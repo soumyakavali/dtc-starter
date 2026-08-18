@@ -120,19 +120,35 @@ export default function ProductActions({
 
   const inView = useIntersection(actionsRef, "0px")
 
+  const [cartError, setCartError] = useState<string | null>(null)
+  const [addedSuccess, setAddedSuccess] = useState(false)
+
   // add the selected variant to the cart
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) return null
 
     setIsAdding(true)
+    setCartError(null)
+    setAddedSuccess(false)
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
-    })
-
-    setIsAdding(false)
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      })
+      setAddedSuccess(true)
+      setTimeout(() => setAddedSuccess(false), 4000)
+    } catch (err: unknown) {
+      console.error("Add to cart failed:", err)
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Could not add product to cart. Please ensure the backend is running and the region is seeded."
+      setCartError(message)
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (
@@ -176,12 +192,33 @@ export default function ProductActions({
           isLoading={isAdding}
           data-testid="add-product-button"
         >
-          {!selectedVariant && !options
+          {addedSuccess
+            ? "✓ Added to Cart! / ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ"
+            : !selectedVariant && !options
             ? "Select variant"
             : !inStock || !isValidVariant
             ? "Out of stock"
             : "Add to cart"}
         </Button>
+
+        {addedSuccess && (
+          <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-semibold flex items-center justify-between animate-fadeIn">
+            <span>🌾 Product added to cart! / ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ</span>
+            <a
+              href={`/${countryCode}/cart`}
+              className="underline font-bold text-emerald-800 hover:text-emerald-950"
+            >
+              View Cart →
+            </a>
+          </div>
+        )}
+
+        {cartError && (
+          <div className="p-2.5 rounded-lg bg-red-50 border border-red-300 text-red-800 text-xs">
+            <p className="font-bold">⚠️ Cart Error:</p>
+            <p className="mt-0.5">{cartError}</p>
+          </div>
+        )}
         <MobileActions
           product={product}
           variant={selectedVariant}

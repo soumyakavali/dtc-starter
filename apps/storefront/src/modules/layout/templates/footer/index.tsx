@@ -1,157 +1,161 @@
-import { listCategories } from "@lib/data/categories";
-import { listCollections } from "@lib/data/collections";
-import { Text, clx } from "@modules/common/components/ui";
-
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import MedusaCTA from "@modules/layout/components/medusa-cta";
+import { listCategories } from "@lib/data/categories"
+import { listCollections } from "@lib/data/collections"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import LeafIcon from "@modules/common/icons/leaf"
+import PhonePeIcon from "@modules/common/icons/phonepe"
+import PaytmIcon from "@modules/common/icons/paytm"
+import UpiIcon from "@modules/common/icons/upi"
 
 export default async function Footer() {
   const { collections } = await listCollections({
     fields: "*products",
-  });
-  const productCategories = await listCategories();
+  }).catch(() => ({ collections: [] }))
+  const productCategories = await listCategories().catch(() => [])
 
   return (
-    <footer className="border-t border-ui-border-base w-full">
-      <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-40">
-          <div>
+    <footer className="border-t border-emerald-900/30 bg-emerald-950 text-emerald-100 w-full font-sans">
+      <div className="content-container flex flex-col w-full py-16">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-emerald-800/80">
+          {/* Brand Info */}
+          <div className="md:col-span-4 space-y-4">
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
+              className="flex items-center gap-2.5 group"
             >
-              Medusa Store
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900 text-white flex items-center justify-center shadow-md shadow-emerald-900/40 group-hover:scale-105 transition-transform">
+                <LeafIcon size={22} />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="font-extrabold text-xl tracking-tight text-white flex items-center gap-1">
+                  BioTill<span className="text-emerald-400">Agri</span>
+                </span>
+                <span className="text-[9px] uppercase font-bold tracking-widest text-emerald-300">
+                  BIOTILL AGRI PRIVATE LIMITED
+                </span>
+              </div>
             </LocalizedClientLink>
-          </div>
-          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
-            {productCategories && productCategories?.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Categories
-                </span>
-                <ul
-                  className="grid grid-cols-1 gap-2"
-                  data-testid="footer-categories"
-                >
-                  {productCategories?.slice(0, 6).map((c) => {
-                    if (c.parent_category) {
-                      return;
-                    }
-
-                    const children =
-                      c.category_children?.map((child) => ({
-                        name: child.name,
-                        handle: child.handle,
-                        id: child.id,
-                      })) || null;
-
-                    return (
-                      <li
-                        className="flex flex-col gap-2 text-ui-fg-subtle txt-small"
-                        key={c.id}
-                      >
-                        <LocalizedClientLink
-                          className={clx(
-                            "hover:text-ui-fg-base",
-                            children && "txt-small-plus"
-                          )}
-                          href={`/categories/${c.handle}`}
-                          data-testid="category-link"
-                        >
-                          {c.name}
-                        </LocalizedClientLink>
-                        {children && (
-                          <ul className="grid grid-cols-1 ml-3 gap-2">
-                            {children &&
-                              children.map((child) => (
-                                <li key={child.id}>
-                                  <LocalizedClientLink
-                                    className="hover:text-ui-fg-base"
-                                    href={`/categories/${child.handle}`}
-                                    data-testid="category-link"
-                                  >
-                                    {child.name}
-                                  </LocalizedClientLink>
-                                </li>
-                              ))}
-                          </ul>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-            {collections && collections.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Collections
-                </span>
-                <ul
-                  className={clx(
-                    "grid grid-cols-1 gap-2 text-ui-fg-subtle txt-small",
-                    {
-                      "grid-cols-2": (collections?.length || 0) > 3,
-                    }
-                  )}
-                >
-                  {collections?.slice(0, 6).map((c) => (
-                    <li key={c.id}>
-                      <LocalizedClientLink
-                        className="hover:text-ui-fg-base"
-                        href={`/collections/${c.handle}`}
-                      >
-                        {c.title}
-                      </LocalizedClientLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">Medusa</span>
-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-                <li>
-                  <a
-                    href="https://github.com/medusajs"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    GitHub
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://docs.medusajs.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Documentation
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://github.com/medusajs/dtc-starter"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Source code
-                  </a>
-                </li>
-              </ul>
+            <p className="text-xs text-emerald-200/90 leading-relaxed max-w-sm">
+              ರೈತರಿಗೆ ನೇರ ತಂತ್ರಜ್ಞಾನ ಆಧಾರಿತ 100% ಶುದ್ಧ ಜೈವಿಕ ಕೃಷಿ ಉತ್ಪನ್ನಗಳು. ಉತ್ತಮ ಇಳುವರಿ ಮತ್ತು ಮಣ್ಣಿನ ಫಲವತ್ತತೆಗಾಗಿ ಪ್ರಮಾಣೀಕೃತ ಬಯೋ-ಫಂಗಿಸೈಡ್, ಬ್ಯಾಕ್ಟೀರಿಯಾನಾಶಕ, ಕೀಟನಾಶಕ ಹಾಗೂ ಸಾವಯವ ಗೊಬ್ಬರಗಳು.
+            </p>
+            <div className="space-y-1.5 text-xs text-emerald-300">
+              <p className="flex items-center gap-1.5">
+                <span>🏢</span> <strong>BIOTILL AGRI PRIVATE LIMITED</strong>
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span>🌱</span> <strong>Bio-Certified:</strong> CCOF & NPOP Organic Inputs
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span>🚚</span> <strong>Farmer Doorstep Delivery:</strong> Pan India Farm Dispatch
+              </p>
             </div>
           </div>
+
+          {/* Categories */}
+          <div className="md:col-span-3 space-y-3">
+            <h4 className="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-1.5">
+              <span>🌿</span> ಉತ್ಪನ್ನ ವಿಭಾಗಗಳು (Categories)
+            </h4>
+            <ul className="space-y-2 text-xs text-emerald-200">
+              <li>
+                <LocalizedClientLink
+                  className="hover:text-amber-400 transition-colors flex items-center justify-between"
+                  href="/collections/powder-products"
+                >
+                  <span>📦 ಪೌಡರ್ ಉತ್ಪನ್ನಗಳು (Powder 1 Kg)</span>
+                  <span className="text-amber-400 font-bold">₹150/-</span>
+                </LocalizedClientLink>
+              </li>
+              <li>
+                <LocalizedClientLink
+                  className="hover:text-amber-400 transition-colors flex items-center justify-between"
+                  href="/collections/liquid-products"
+                >
+                  <span>🧪 ಲಿಕ್ವಿಡ್ ಉತ್ಪನ್ನಗಳು (Liquid 1 L)</span>
+                  <span className="text-amber-400 font-bold">₹350/-</span>
+                </LocalizedClientLink>
+              </li>
+              {productCategories?.slice(0, 4).map((c) => (
+                <li key={c.id}>
+                  <LocalizedClientLink
+                    className="hover:text-amber-400 transition-colors"
+                    href={`/categories/${c.handle}`}
+                  >
+                    {c.name}
+                  </LocalizedClientLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div className="md:col-span-2 space-y-3">
+            <h4 className="font-bold text-white text-sm uppercase tracking-wider">
+              ತ್ವರಿತ ಲಿಂಕ್‌ಗಳು
+            </h4>
+            <ul className="space-y-2 text-xs text-emerald-200">
+              <li>
+                <LocalizedClientLink
+                  className="hover:text-amber-400 transition-colors"
+                  href="/store"
+                >
+                  ಎಲ್ಲಾ 10 ಉತ್ಪನ್ನಗಳು (All Products)
+                </LocalizedClientLink>
+              </li>
+              <li>
+                <LocalizedClientLink
+                  className="hover:text-amber-400 transition-colors"
+                  href="/cart"
+                >
+                  ಬುಟ್ಟಿ (Cart & Checkout)
+                </LocalizedClientLink>
+              </li>
+              {collections?.slice(0, 3).map((c) => (
+                <li key={c.id}>
+                  <LocalizedClientLink
+                    className="hover:text-amber-400 transition-colors"
+                    href={`/collections/${c.handle}`}
+                  >
+                    {c.title}
+                  </LocalizedClientLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Payments & Assurance */}
+          <div className="md:col-span-3 space-y-3">
+            <h4 className="font-bold text-white text-sm uppercase tracking-wider">
+              ಸುರಕ್ಷಿತ ಪಾವತಿ (Safe Payments)
+            </h4>
+            <p className="text-xs text-emerald-200/90">
+              0% ಹೆಚ್ಚುವರಿ ಶುಲ್ಕದೊಂದಿಗೆ ಎಲ್ಲಾ ಭಾರತೀಯ ಪಾವತಿ ವಿಧಾನಗಳು ಲಭ್ಯ:
+            </p>
+            <div className="flex items-center gap-2 pt-1">
+              <div className="p-1.5 bg-white rounded-md shadow-xs">
+                <PhonePeIcon size={24} />
+              </div>
+              <div className="p-1.5 bg-white rounded-md shadow-xs">
+                <PaytmIcon size={24} />
+              </div>
+              <div className="p-1.5 bg-white rounded-md shadow-xs">
+                <UpiIcon size={24} />
+              </div>
+            </div>
+            <p className="text-[11px] text-emerald-300 pt-1 font-medium">
+              ✓ PhonePe, Paytm, Google Pay, UPI & Cash on Delivery (COD)
+            </p>
+          </div>
         </div>
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
-          <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Medusa Store. All rights reserved.
-          </Text>
-          <MedusaCTA />
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 text-xs text-emerald-300">
+          <p>© {new Date().getFullYear()} BIOTILL AGRI PRIVATE LIMITED. All rights reserved.</p>
+          <div className="flex items-center gap-4 text-emerald-400">
+            <span>100% Bio-Organic Certified</span>
+            <span>•</span>
+            <span>Made for Indian Farmers</span>
+          </div>
         </div>
       </div>
     </footer>
-  );
+  )
 }

@@ -278,32 +278,32 @@ export async function applyPromotions(codes: string[]) {
     .catch(medusaError)
 }
 
-export async function applyGiftCard(code: string) {
+export async function applyGiftCard(_code: string) {
   //   const cartId = getCartId()
   //   if (!cartId) return "No cartId cookie found"
   //   try {
   //     await updateCart(cartId, { gift_cards: [{ code }] }).then(() => {
   //       revalidateTag("cart")
   //     })
-  //   } catch (error: any) {
+  //   } catch (error: unknown) {
   //     throw error
   //   }
 }
 
-export async function removeDiscount(code: string) {
+export async function removeDiscount(_code: string) {
   // const cartId = getCartId()
   // if (!cartId) return "No cartId cookie found"
   // try {
   //   await deleteDiscount(cartId, code)
   //   revalidateTag("cart")
-  // } catch (error: any) {
+  // } catch (error: unknown) {
   //   throw error
   // }
 }
 
 export async function removeGiftCard(
-  codeToRemove: string,
-  giftCards: any[]
+  _codeToRemove: string,
+  _giftCards: unknown[]
   // giftCards: GiftCard[]
 ) {
   //   const cartId = getCartId()
@@ -316,25 +316,25 @@ export async function removeGiftCard(
   //     }).then(() => {
   //       revalidateTag("cart")
   //     })
-  //   } catch (error: any) {
+  //   } catch (error: unknown) {
   //     throw error
   //   }
 }
 
 export async function submitPromotionForm(
-  currentState: unknown,
+  _currentState: unknown,
   formData: FormData
 ) {
   const code = formData.get("code") as string
   try {
     await applyPromotions([code])
-  } catch (e: any) {
-    return e.message
+  } catch (e: unknown) {
+    return (e as Error).message
   }
 }
 
 // TODO: Pass a POJO instead of a form entity here
-export async function setAddresses(currentState: unknown, formData: FormData) {
+export async function setAddresses(_currentState: unknown, formData: FormData) {
   try {
     if (!formData) {
       throw new Error("No form data found when setting addresses")
@@ -344,41 +344,45 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error("No existing cart found when setting addresses")
     }
 
-    const data = {
-      shipping_address: {
-        first_name: formData.get("shipping_address.first_name"),
-        last_name: formData.get("shipping_address.last_name"),
-        address_1: formData.get("shipping_address.address_1"),
-        address_2: "",
-        company: formData.get("shipping_address.company"),
-        postal_code: formData.get("shipping_address.postal_code"),
-        city: formData.get("shipping_address.city"),
-        country_code: formData.get("shipping_address.country_code"),
-        province: formData.get("shipping_address.province"),
-        phone: formData.get("shipping_address.phone"),
-      },
-      email: formData.get("email"),
-    } as any
+    const shippingAddress = {
+      first_name: formData.get("shipping_address.first_name") as string,
+      last_name: formData.get("shipping_address.last_name") as string,
+      address_1: formData.get("shipping_address.address_1") as string,
+      address_2: "",
+      company: (formData.get("shipping_address.company") as string) || "",
+      postal_code: formData.get("shipping_address.postal_code") as string,
+      city: formData.get("shipping_address.city") as string,
+      country_code: formData.get("shipping_address.country_code") as string,
+      province: (formData.get("shipping_address.province") as string) || "",
+      phone: (formData.get("shipping_address.phone") as string) || "",
+    }
 
     const sameAsBilling = formData.get("same_as_billing")
-    if (sameAsBilling === "on") data.billing_address = data.shipping_address
+    const billingAddress =
+      sameAsBilling === "on"
+        ? shippingAddress
+        : {
+            first_name: formData.get("billing_address.first_name") as string,
+            last_name: formData.get("billing_address.last_name") as string,
+            address_1: formData.get("billing_address.address_1") as string,
+            address_2: "",
+            company: (formData.get("billing_address.company") as string) || "",
+            postal_code: formData.get("billing_address.postal_code") as string,
+            city: formData.get("billing_address.city") as string,
+            country_code: formData.get("billing_address.country_code") as string,
+            province: (formData.get("billing_address.province") as string) || "",
+            phone: (formData.get("billing_address.phone") as string) || "",
+          }
 
-    if (sameAsBilling !== "on")
-      data.billing_address = {
-        first_name: formData.get("billing_address.first_name"),
-        last_name: formData.get("billing_address.last_name"),
-        address_1: formData.get("billing_address.address_1"),
-        address_2: "",
-        company: formData.get("billing_address.company"),
-        postal_code: formData.get("billing_address.postal_code"),
-        city: formData.get("billing_address.city"),
-        country_code: formData.get("billing_address.country_code"),
-        province: formData.get("billing_address.province"),
-        phone: formData.get("billing_address.phone"),
-      }
+    const data: Parameters<typeof updateCart>[0] = {
+      shipping_address: shippingAddress,
+      billing_address: billingAddress,
+      email: formData.get("email") as string,
+    }
+
     await updateCart(data)
-  } catch (e: any) {
-    return e.message
+  } catch (e: unknown) {
+    return (e as Error).message
   }
 
   redirect(

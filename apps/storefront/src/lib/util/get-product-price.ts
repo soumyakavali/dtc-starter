@@ -7,33 +7,39 @@ type VariantWithPrice = HttpTypes.StoreProductVariant & {
     calculated_amount: number
     original_amount: number
     currency_code: string
-    calculated_price: {
-      price_list_type: string
+    calculated_price?: {
+      price_list_type?: string
     }
+    price_list_type?: string
   }
 }
 
 export const getPricesForVariant = (variant: VariantWithPrice) => {
-  if (!variant?.calculated_price?.calculated_amount) {
+  if (!variant?.calculated_price || typeof variant.calculated_price.calculated_amount !== "number") {
     return null
   }
 
+  const calcAmount = variant.calculated_price.calculated_amount
+  const origAmount = variant.calculated_price.original_amount ?? calcAmount
+  const currCode = variant.calculated_price.currency_code || "inr"
+  const priceType = variant.calculated_price.calculated_price?.price_list_type || variant.calculated_price.price_list_type || "default"
+
   return {
-    calculated_price_number: variant.calculated_price.calculated_amount,
+    calculated_price_number: calcAmount,
     calculated_price: convertToLocale({
-      amount: variant.calculated_price.calculated_amount,
-      currency_code: variant.calculated_price.currency_code,
+      amount: calcAmount,
+      currency_code: currCode,
     }),
-    original_price_number: variant.calculated_price.original_amount,
+    original_price_number: origAmount,
     original_price: convertToLocale({
-      amount: variant.calculated_price.original_amount,
-      currency_code: variant.calculated_price.currency_code,
+      amount: origAmount,
+      currency_code: currCode,
     }),
-    currency_code: variant.calculated_price.currency_code,
-    price_type: variant.calculated_price.calculated_price.price_list_type,
+    currency_code: currCode,
+    price_type: priceType,
     percentage_diff: getPercentageDiff(
-      variant.calculated_price.original_amount,
-      variant.calculated_price.calculated_amount
+      origAmount,
+      calcAmount
     ),
   }
 }

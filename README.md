@@ -1,158 +1,203 @@
-<p align="center">
-  <a href="https://www.medusajs.com">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/59018053/229103275-b5e482bb-4601-46e6-8142-244f531cebdb.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/59018053/229103726-e5b529a3-9b3f-4970-8a1f-c6af37f087bf.svg">
-    <img alt="Medusa logo" src="https://user-images.githubusercontent.com/59018053/229103726-e5b529a3-9b3f-4970-8a1f-c6af37f087bf.svg">
-    </picture>
-  </a>
-</p>
-<h1 align="center">
-  Medusa DTC Starter
-</h1>
+# 🌾 BioTill Agri - Direct Farmer E-Commerce Platform
 
-<h4 align="center">
-  <a href="https://docs.medusajs.com">Documentation</a> |
-  <a href="https://www.medusajs.com">Website</a>
-</h4>
+> **BIOTILL AGRI PRIVATE LIMITED**  
+> High-potency biological inputs, bio-fungicides, and microbial consortia directly delivered to farmers across Karnataka.
 
-<p align="center">
-  Building blocks for digital commerce
-</p>
-<p align="center">
-  <a href="https://github.com/medusajs/medusa/blob/develop/LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Medusa is released under the MIT license." />
-  </a>
-  <a href="https://circleci.com/gh/medusajs/medusa">
-    <img src="https://circleci.com/gh/medusajs/medusa.svg?style=shield" alt="Current CircleCI build status." />
-  </a>
-  <a href="https://github.com/medusajs/medusa/blob/develop/CONTRIBUTING.md">
-    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" alt="PRs welcome!" />
-  </a>
-    <a href="https://www.producthunt.com/posts/medusa"><img src="https://img.shields.io/badge/Product%20Hunt-%231%20Product%20of%20the%20Day-%23DA552E" alt="Product Hunt"></a>
-  <a href="https://discord.gg/xpCwq3Kfn8">
-    <img src="https://img.shields.io/badge/chat-on%20discord-7289DA.svg" alt="Discord Chat" />
-  </a>
-  <a href="https://twitter.com/intent/follow?screen_name=medusajs">
-    <img src="https://img.shields.io/twitter/follow/medusajs.svg?label=Follow%20@medusajs" alt="Follow @medusajs" />
-  </a>
-</p>
+---
 
-# Medusa DTC Starter
+## 🚀 Quick Start Options
 
-A production-ready monorepo starter for direct-to-consumer ecommerce stores powered by Medusa and Next.js. Includes a fully featured storefront with product browsing, cart, checkout, customer accounts, and order management.
+You can run this project locally using either **Docker (Recommended - 1 Command)** or **Local Node.js**.
 
-## Features
+---
 
-- All of [Medusa's commerce features](https://docs.medusajs.com/resources/commerce-modules)
-- Multi-region support with automatic country detection
-- Product catalog with variant selection
-- Cart with promotion codes
-- Multi-step checkout with shipping and payment
-- Customer accounts with order history and address management
-- Order transfer between accounts
+## Method 1: Run with Docker Compose (Fastest & Easiest)
 
-## Getting Started
+### Prerequisites:
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
 
-### Deploy with Medusa Cloud
+### Steps:
+1. **Clone the repository**:
+   ```bash
+   git clone <YOUR_REPO_URL>
+   cd <REPO_FOLDER>
+   ```
 
-The fastest way to get started is deploying with [Medusa Cloud](https://cloud.medusajs.com):
+2. **Start all services (Postgres, Redis, Medusa Backend & Next.js Storefront)**:
+   ```bash
+   docker compose up --build
+   ```
 
-1. [Create a Medusa Cloud account](https://cloud.medusajs.com)
-2. Deploy this starter directly from your dashboard
+3. **Access the Applications**:
+   * 🛒 **Storefront (Farmer Portal)**: [http://localhost:3000](http://localhost:3000)
+   * ⚙️ **Medusa Admin Dashboard**: [http://localhost:9000/app](http://localhost:9000/app)
+   * 📡 **Medusa Backend API**: [http://localhost:9000](http://localhost:9000)
 
-### Local Installation
+4. **Stop the containers**:
+   ```bash
+   docker compose down
+   ```
 
-> **Prerequisites:
->
-> - [Node.js](https://nodejs.org/) v20+
-> - [PostgreSQL](https://www.postgresql.org/) v15+
-> - [pnpm](https://pnpm.io/) v10+
+---
 
-1. Clone the repository and install dependencies:
+## Method 2: Run Locally with Node.js & npm / pnpm
 
+### Prerequisites:
+* **Node.js**: `v20+` or `v22+`
+* **PostgreSQL**: `v15+` running locally on port `5432`
+* **Redis** (optional for local dev): port `6379`
+* **npm** or **pnpm**
+
+---
+
+### Step 1: Install Dependencies
+From the repository root:
 ```bash
-git clone https://github.com/medusajs/dtc-starter.git
-cd dtc-starter
+npm install
+# or if using pnpm:
 pnpm install
 ```
 
-2. Set up environment variables for the backend:
+---
 
+### Step 2: Configure & Start Medusa Backend
+
+1. **Set up backend environment variables**:
+   ```bash
+   cp apps/backend/.env.template apps/backend/.env
+   ```
+
+2. **Ensure your database URL is configured in `apps/backend/.env`**:
+   ```env
+   DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-biotill
+   JWT_SECRET=biotill_super_secure_jwt_secret_key_2026
+   COOKIE_SECRET=biotill_super_secure_cookie_secret_key_2026
+   STORE_CORS=http://localhost:3000,http://127.0.0.1:3000
+   ADMIN_CORS=http://localhost:9000,http://localhost:7001
+   AUTH_CORS=http://localhost:3000,http://localhost:9000
+   ```
+
+3. **Run database migrations & create admin user**:
+   ```bash
+   cd apps/backend
+   npx medusa db:migrate
+   npx medusa user -e admin@biotill.in -p supersecret
+   ```
+
+4. **Seed initial 10 BioTill Bio-Products catalog & Karnataka region**:
+   ```bash
+   npm run seed
+   # or from root: npm run backend:seed
+   ```
+
+5. **Start Medusa backend dev server**:
+   ```bash
+   npm run dev
+   ```
+   *Medusa runs on `http://localhost:9000` (Admin at `http://localhost:9000/app`).*
+
+---
+
+### Step 3: Configure & Start Next.js Storefront
+
+1. Open a new terminal tab:
+   ```bash
+   cd apps/storefront
+   ```
+
+2. **Create local environment file**:
+   ```bash
+   cp .env.template .env.local
+   ```
+
+3. **Verify `apps/storefront/.env.local`**:
+   ```env
+   PORT=3000
+   NEXT_PUBLIC_BASE_URL=http://localhost:3000
+   MEDUSA_BACKEND_URL=http://localhost:9000
+   NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://localhost:9000
+   NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_your_publishable_key
+   NEXT_PUBLIC_DEFAULT_REGION=in
+   ```
+
+4. **Start the Storefront**:
+   ```bash
+   npm run dev
+   ```
+   *The Farmer Storefront is live at [http://localhost:3000](http://localhost:3000).*
+
+---
+
+### Starting Both Apps Simultaneously (Turbo)
+From the root directory:
 ```bash
-cp apps/backend/.env.template apps/backend/.env
+npm run dev
 ```
 
-3. Set the database URL in `apps/backend.env`:
+---
 
-```bash
-# Replace with actual database URL, make sure the database exists.
-DATABASE_URL=postgres://postgres:@localhost:5432/medusa-dtc-starter
-```
+## 🧪 Running Automated Test Suites
 
-4. Run migrations:
+The codebase includes end-to-end tests for product pricing, payment gateway integrations (PhonePe / Paytm), Karnataka address validation, and complete purchasing journeys.
 
+To run all unit & workflow tests:
 ```bash
 cd apps/backend
-pnpm medusa db:migrate
+npm run test:unit
 ```
 
-5. Add admin user:
+### Key Test Suites Included:
+| Test File | Description |
+|-----------|-------------|
+| `buying-and-delivery-status.unit.spec.ts` | Order lifecycle from payment captured, warehouse dispatch, tracking to farm delivery |
+| `address-check-validation.unit.spec.ts` | 6-digit Karnataka PIN codes, 10-digit Indian mobile number validation, farm landmarks |
+| `payment-validation.unit.spec.ts` | PhonePe UPI Intent QR payloads (`pa=biotillagri@ybl`), Paytm wallet sessions, rupee-to-paise integrity |
+| `complete-end-to-end.unit.spec.ts` | Farmer registration (No OTP) $\to$ Login $\to$ Cart $\to$ Free delivery threshold ₹999 $\to$ UPI payment $\to$ Delivered |
+| `biotill-workflow.unit.spec.ts` | Complete 10 bio-products catalog validation (₹150 powders & ₹350 liquids) |
 
-```bash
-cd apps/backend
-pnpm medusa user -e admin@test.com -p supersecret
+---
+
+## 🛒 BioTill Agri Product Catalog & Pricing
+
+### 6 Powder Products (₹150 / 1 Kg Pack):
+1. **Trichoderma Viride Bio-Fungicide** (`₹150`) - 1 Kg Pack
+2. **Pseudomonas Fluorescens Bio-Bactericide** (`₹150`) - 1 Kg Pack
+3. **Metarhizium Anisopliae Bio-Insecticide** (`₹150`) - 1 Kg Pack
+4. **VAM Mycorrhiza Bio-Fertilizer** (`₹150`) - 1 Kg Pack
+5. **Paecilomyces Lilacinus Bio-Nematicide** (`₹150`) - 1 Kg Pack
+6. **Compost Culture Bio-Decomposer** (`₹150`) - 1 Kg Pack
+
+### 4 Liquid Products (₹350 / 1 Litre Bottle):
+7. **Trichoderma Liquid Concentrate** (`₹350`) - 1 Litre Bottle
+8. **Pseudomonas Fluorescens Liquid** (`₹350`) - 1 Litre Bottle
+9. **Metarhizium Liquid Concentrate** (`₹350`) - 1 Litre Bottle
+10. **Bio NPK Liquid Consortium** (`₹350`) - 1 Litre Bottle
+
+---
+
+## 🛠️ Project Structure
+
+```text
+.
+├── apps/
+│   ├── backend/                  # Medusa v2 eCommerce Backend (@dtc/backend)
+│   │   ├── src/
+│   │   │   ├── __tests__/        # Unit & E2E Test Suites
+│   │   │   ├── api/              # Custom API endpoints (Farmer auth, PhonePe/Paytm Webhooks)
+│   │   │   └── modules/          # Payment providers & custom modules
+│   │   └── Dockerfile
+│   └── storefront/               # Next.js 15 Farmer Web Storefront (@dtc/storefront)
+│       ├── src/
+│       │   ├── app/              # App router pages (Home, Products, Cart, Checkout, Account)
+│       │   └── modules/          # Farmer search, Kannada localization, UPI QR modal
+│       └── Dockerfile
+├── docker-compose.yml            # Multi-container orchestration (DB, Redis, API, Web)
+├── package.json                  # Turborepo root workspace
+└── README.md
 ```
 
-6. Start Medusa backend:
+---
 
-```bash
-cd apps/backend
-pnpm dev
-```
-
-7. Open the admin dashboard at `localhost:9000/app` and log in. Retrieve your publishable API key at Settings > Publishable API key.
-
-8. Set up environment variables for the storefront:
-
-```bash
-cp apps/storefront/.env.template apps/storefront/.env.local
-```
-
-9. Update `apps/storefront/.env.local` with your Medusa publishable API key:
-
-```bash
-NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_6c3...
-```
-
-10.  Start storefront:
-
-```bash
-cd apps/storefront
-pnpm dev
-```
-
-The storefront runs on `http://localhost:8000`.
-
-You can slo run the following command from the root to start both backend and storefront:
-
-```bash
-pnpm dev
-```
-
-## Configuration
-
-The storefront is configured via environment variables in `apps/storefront/.env.local`:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` | Publishable API key from your Medusa backend | — |
-| `NEXT_PUBLIC_MEDUSA_BACKEND_URL` | URL of your Medusa backend | `http://localhost:9000` |
-| `NEXT_PUBLIC_DEFAULT_REGION` | Default region country code | `dk` |
-| `NEXT_PUBLIC_BASE_URL` | Base URL of the storefront | `https://localhost:8000` |
-| `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key (optional) | — |
-
-## Resources
-
-- [Medusa Documentation](https://docs.medusajs.com)
-- [Medusa Cloud](https://cloud.medusajs.com)
+## 📞 Support & Farmer Helpline
+* **Support Phone**: `+91 94800 00000` (Mon - Sat: 8:00 AM - 8:00 PM)
+* **Company**: BIOTILL AGRI PRIVATE LIMITED

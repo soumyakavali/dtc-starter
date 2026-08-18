@@ -1,0 +1,7 @@
+{
+  "name": "KrishiVeda Direct Agri Marketplace",
+  "description": "Direct-to-farmer agricultural eCommerce platform with certified seeds, bio-fertilizers, farm machinery, and seamless PhonePe, Paytm, & UPI checkout.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

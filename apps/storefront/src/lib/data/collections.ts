@@ -3,6 +3,7 @@
 import { sdk } from "@lib/config"
 import { HttpTypes } from "@medusajs/types"
 import { getCacheOptions } from "./cookies"
+import { MOCK_COLLECTIONS } from "./mock-data"
 
 export const retrieveCollection = async (id: string) => {
   const next = {
@@ -17,7 +18,10 @@ export const retrieveCollection = async (id: string) => {
         cache: "force-cache",
       }
     )
-    .then(({ collection }) => collection)
+    .then(({ collection }) => collection || MOCK_COLLECTIONS.find((c) => c.id === id) || null)
+    .catch(() => {
+      return MOCK_COLLECTIONS.find((c) => c.id === id) || null
+    })
 }
 
 export const listCollections = async (
@@ -39,7 +43,15 @@ export const listCollections = async (
         cache: "force-cache",
       }
     )
-    .then(({ collections }) => ({ collections, count: collections.length }))
+    .then(({ collections }) => {
+      if (collections && collections.length > 0) {
+        return { collections, count: collections.length }
+      }
+      return { collections: MOCK_COLLECTIONS, count: MOCK_COLLECTIONS.length }
+    })
+    .catch(() => {
+      return { collections: MOCK_COLLECTIONS, count: MOCK_COLLECTIONS.length }
+    })
 }
 
 export const getCollectionByHandle = async (
@@ -55,5 +67,9 @@ export const getCollectionByHandle = async (
       next,
       cache: "force-cache",
     })
-    .then(({ collections }) => collections[0] || null)
+    .then(({ collections }) => collections[0] || MOCK_COLLECTIONS.find((c) => c.handle === handle) || null)
+    .catch(() => {
+      return MOCK_COLLECTIONS.find((c) => c.handle === handle) || null
+    })
 }
+

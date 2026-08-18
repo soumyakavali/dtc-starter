@@ -3,6 +3,7 @@
 import { sdk } from "@lib/config"
 import { HttpTypes } from "@medusajs/types"
 import { getCacheOptions } from "./cookies"
+import { DEFAULT_MOCK_REGION } from "./mock-data"
 
 export const listRegions = async () => {
   const next = {
@@ -15,7 +16,10 @@ export const listRegions = async () => {
       next,
       cache: "force-cache",
     })
-    .then(({ regions }) => regions)
+    .then(({ regions }) => (regions && regions.length > 0 ? regions : [DEFAULT_MOCK_REGION]))
+    .catch(() => {
+      return [DEFAULT_MOCK_REGION]
+    })
 }
 
 export const retrieveRegion = async (id: string) => {
@@ -29,7 +33,10 @@ export const retrieveRegion = async (id: string) => {
       next,
       cache: "force-cache",
     })
-    .then(({ region }) => region)
+    .then(({ region }) => region || DEFAULT_MOCK_REGION)
+    .catch(() => {
+      return DEFAULT_MOCK_REGION
+    })
 }
 
 const regionMap = new Map<string, HttpTypes.StoreRegion>()
@@ -41,8 +48,8 @@ export const getRegion = async (countryCode: string) => {
 
   const regions = await listRegions()
 
-  if (!regions) {
-    return null
+  if (!regions || regions.length === 0) {
+    return DEFAULT_MOCK_REGION
   }
 
   regions.forEach((region) => {
@@ -53,7 +60,8 @@ export const getRegion = async (countryCode: string) => {
 
   const region = countryCode
     ? regionMap.get(countryCode)
-    : regionMap.get("us")
+    : regionMap.get("in") || regionMap.get("us") || DEFAULT_MOCK_REGION
 
-  return region
+  return region || DEFAULT_MOCK_REGION
 }
+
