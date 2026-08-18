@@ -1,10 +1,10 @@
-import { loadEnv, defineConfig, Modules } from '@medusajs/framework/utils'
+import { loadEnv, defineConfig } from '@medusajs/framework/utils'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
-module.exports = defineConfig({
+export default defineConfig({
   projectConfig: {
-    databaseUrl: process.env.DATABASE_URL,
+    databaseUrl: process.env.DATABASE_URL || "postgres://postgres:postgres@postgres:5432/medusa-biotill",
     redisUrl: process.env.REDIS_URL,
     databaseDriverOptions: process.env.DATABASE_URL?.includes("sslmode=require")
       ? { connection: { ssl: { rejectUnauthorized: false } } }

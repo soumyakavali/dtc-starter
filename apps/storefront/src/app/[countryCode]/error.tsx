@@ -10,7 +10,7 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error("Storefront error boundary caught:", error)
+    console.error("Storefront nested error boundary:", error)
     if (
       error?.message?.includes("was not found on the server") ||
       error?.message?.includes("Failed to find Server Action") ||
@@ -23,11 +23,11 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="flex flex-col gap-4 items-center justify-center min-h-[calc(100vh-80px)] p-6 text-center bg-emerald-50/30">
-      <span className="text-6xl">🌾</span>
-      <h1 className="text-3xl font-bold text-emerald-950">Something went wrong!</h1>
-      <p className="text-base text-slate-600 max-w-md">
-        An update occurred or an error was encountered while connecting to the agricultural store.
+    <div className="flex flex-col gap-4 items-center justify-center min-h-[calc(100vh-120px)] p-6 text-center bg-emerald-50/20">
+      <span className="text-5xl">🌱</span>
+      <h2 className="text-2xl font-bold text-emerald-950">Agricultural Store Notice</h2>
+      <p className="text-sm text-slate-600 max-w-md">
+        The application was updated or experienced a connection refresh.
       </p>
       <button
         onClick={() => {
@@ -37,7 +37,7 @@ export default function Error({
             reset()
           }
         }}
-        className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-medium rounded-xl shadow transition-colors"
+        className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium rounded-xl shadow transition-colors"
       >
         Refresh & Try Again
       </button>

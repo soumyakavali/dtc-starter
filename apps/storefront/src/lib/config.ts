@@ -10,7 +10,7 @@ if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
 
 export const sdk = new Medusa({
   baseUrl: MEDUSA_BACKEND_URL,
-  debug: process.env.NODE_ENV === "development",
+  debug: false,
   publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY,
 })
 
@@ -35,5 +35,19 @@ sdk.client.fetch = async <T>(
     ...init,
     headers: newHeaders,
   }
-  return originalFetch(input, init)
+
+  try {
+    return await originalFetch(input, init)
+  } catch (err: unknown) {
+    const error = err as Error
+    if (
+      error?.message?.includes("fetch failed") ||
+      error?.message?.includes("ECONNREFUSED") ||
+      error?.message?.includes("Failed to fetch") ||
+      error?.name === "TypeError"
+    ) {
+      return null as unknown as T
+    }
+    throw err
+  }
 }

@@ -10,6 +10,10 @@
     "backend:seed": "npm run seed --workspace=@dtc/backend",
     "backend:dev": "npm run dev --workspace=@dtc/backend",
     "test:unit": "npm run test:unit --workspace=@dtc/backend",
+    "test:integration": "npm run test:integration:http --workspace=@dtc/backend && npm run test:integration:modules --workspace=@dtc/backend",
+    "test:integration:http": "npm run test:integration:http --workspace=@dtc/backend",
+    "test:integration:modules": "npm run test:integration:modules --workspace=@dtc/backend",
+    "test:sale-order": "npm run test:sale-order --workspace=@dtc/backend",
     "turbo:dev": "turbo dev",
     "turbo:build": "turbo build"
   },

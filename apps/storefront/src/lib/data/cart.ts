@@ -22,34 +22,38 @@ import { getLocale } from "./locale-actions"
  * @returns The cart object if found, or null if not found.
  */
 export async function retrieveCart(cartId?: string, fields?: string) {
-  const id = cartId || (await getCartId())
-  fields ??=
-    "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name"
+  try {
+    const id = cartId || (await getCartId())
+    fields ??=
+      "*items, *region, *items.product, *items.variant, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name"
 
-  if (!id) {
+    if (!id) {
+      return null
+    }
+
+    const headers = {
+      ...(await getAuthHeaders()),
+    }
+
+    const next = {
+      ...(await getCacheOptions("carts")),
+    }
+
+    return await sdk.client
+      .fetch<HttpTypes.StoreCartResponse>(`/store/carts/${id}`, {
+        method: "GET",
+        query: {
+          fields,
+        },
+        headers,
+        next,
+        cache: "force-cache",
+      })
+      .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart || null)
+      .catch(() => null)
+  } catch {
     return null
   }
-
-  const headers = {
-    ...(await getAuthHeaders()),
-  }
-
-  const next = {
-    ...(await getCacheOptions("carts")),
-  }
-
-  return await sdk.client
-    .fetch<HttpTypes.StoreCartResponse>(`/store/carts/${id}`, {
-      method: "GET",
-      query: {
-        fields,
-      },
-      headers,
-      next,
-      cache: "force-cache",
-    })
-    .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart)
-    .catch(() => null)
 }
 
 export async function getOrSetCart(countryCode: string) {
@@ -66,24 +70,42 @@ export async function getOrSetCart(countryCode: string) {
   }
 
   if (!cart) {
-    const locale = await getLocale()
-    const cartResp = await sdk.store.cart.create(
-      { region_id: region.id, locale: locale || undefined },
-      {},
-      headers
-    )
-    cart = cartResp.cart
+    try {
+      const locale = await getLocale()
+      const cartResp = await sdk.store.cart.create(
+        { region_id: region.id, locale: locale || undefined },
+        {},
+        headers
+      )
+      cart = cartResp.cart
 
-    await setCartId(cart.id)
+      await setCartId(cart.id)
 
-    const cartCacheTag = await getCacheTag("carts")
-    revalidateTag(cartCacheTag)
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+    } catch {
+      // Graceful local cart fallback when backend connection is unavailable
+      cart = {
+        id: `cart_local_${Date.now()}`,
+        region_id: region.id,
+        currency_code: region.currency_code || "inr",
+        items: [],
+        shipping_methods: [],
+        subtotal: 0,
+        shipping_total: 0,
+        total: 0,
+      } as unknown as HttpTypes.StoreCart
+    }
   }
 
   if (cart && cart?.region_id !== region.id) {
-    await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
-    const cartCacheTag = await getCacheTag("carts")
-    revalidateTag(cartCacheTag)
+    try {
+      await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+    } catch {
+      // Ignore fallback
+    }
   }
 
   return cart
@@ -458,20 +480,29 @@ export async function updateRegion(countryCode: string, currentPath: string) {
 }
 
 export async function listCartOptions() {
-  const cartId = await getCartId()
-  const headers = {
-    ...(await getAuthHeaders()),
-  }
-  const next = {
-    ...(await getCacheOptions("shippingOptions")),
-  }
+  try {
+    const cartId = await getCartId()
+    if (!cartId) return { shipping_options: [] }
 
-  return await sdk.client.fetch<{
-    shipping_options: HttpTypes.StoreCartShippingOption[]
-  }>("/store/shipping-options", {
-    query: { cart_id: cartId },
-    next,
-    headers,
-    cache: "force-cache",
-  })
+    const headers = {
+      ...(await getAuthHeaders()),
+    }
+    const next = {
+      ...(await getCacheOptions("shippingOptions")),
+    }
+
+    return await sdk.client
+      .fetch<{
+        shipping_options: HttpTypes.StoreCartShippingOption[]
+      }>("/store/shipping-options", {
+        query: { cart_id: cartId },
+        next,
+        headers,
+        cache: "force-cache",
+      })
+      .then((res) => res || { shipping_options: [] })
+      .catch(() => ({ shipping_options: [] }))
+  } catch {
+    return { shipping_options: [] }
+  }
 }
