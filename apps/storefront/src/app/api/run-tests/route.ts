@@ -2493,6 +2493,19 @@ export async function GET(_req: NextRequest) {
     }
   )
 
+  await runTest(
+    "Extended Farmer UI & User Flows",
+    "UI-90",
+    "Account Register & Redirect URL Verification ('/in/account?mode=register&redirect=%2Fin%2Fproducts%2Fbio-npk-consortium-liquid')",
+    "ಖಾತೆ ನೋಂದಣಿ ಮತ್ತು ರಿಡೈರೆಕ್ಟ್ URL ಪರಿಶೀಲನೆ ('/in/account?mode=register&redirect=%2Fin%2Fproducts%2Fbio-npk-consortium-liquid')",
+    async () => {
+      const res = await fetch("http://localhost:3000/in/account?mode=register&redirect=%2Fin%2Fproducts%2Fbio-npk-consortium-liquid").catch(() => null)
+      if (!res || !res.ok) {
+        throw new Error("Account register & redirect page failed to load or returned non-OK status")
+      }
+    }
+  )
+
   // =========================================================================
   // SYSTEM CLEANUP & RESTORATION
   // =========================================================================
