@@ -1,10 +1,9 @@
-import { CreditCard } from "@medusajs/icons"
 import PhonePeIcon from "@modules/common/icons/phonepe"
 import PaytmIcon from "@modules/common/icons/paytm"
 import UpiIcon from "@modules/common/icons/upi"
 import React from "react"
 
-/* Map of payment provider_id to their title and icon (Only UPI, COD, PhonePe, Paytm) */
+/* Map of payment provider_id to their title and icon (Only 3 payment modes: BHIM UPI, Paytm, PhonePe) */
 export const paymentInfoMap: Record<
   string,
   { title: string; icon: React.JSX.Element; description?: string }
@@ -38,16 +37,6 @@ export const paymentInfoMap: Record<
     title: "Google Pay & BHIM UPI",
     icon: <UpiIcon size={24} />,
     description: "Pay using any UPI App (GPay, BHIM, Cred, Amazon Pay)",
-  },
-  cod: {
-    title: "Cash on Delivery (Pay on Delivery)",
-    icon: <CreditCard />,
-    description: "Pay cash after physical delivery & inspection",
-  },
-  pp_cod_agri: {
-    title: "Cash on Delivery (Pay on Delivery)",
-    icon: <CreditCard />,
-    description: "Pay cash after physical delivery & inspection",
   },
 }
 

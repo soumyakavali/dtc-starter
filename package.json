@@ -1,1 +1,32 @@
-{"name":"biotill-monorepo","private":true,"scripts":{"dev":"npm --prefix apps/storefront run dev","build":"npm --prefix apps/storefront run build","start":"npm --prefix apps/storefront run start","lint":"npm --prefix apps/storefront run lint","backend:build":"npm run build --workspace=@dtc/backend","backend:start":"npm run start --workspace=@dtc/backend","storefront:build":"npm --prefix apps/storefront run build","storefront:start":"npm --prefix apps/storefront run start","seed":"npm run seed --workspace=@dtc/backend","backend:seed":"npm run seed --workspace=@dtc/backend","backend:dev":"npm run dev --workspace=@dtc/backend","test:unit":"npm run test:unit --workspace=@dtc/backend","test:integration":"npm run test:integration:http --workspace=@dtc/backend && npm run test:integration:modules --workspace=@dtc/backend","test:integration:http":"npm run test:integration:http --workspace=@dtc/backend","test:integration:modules":"npm run test:integration:modules --workspace=@dtc/backend","test:sale-order":"npm run test:sale-order --workspace=@dtc/backend","turbo:dev":"turbo dev","turbo:build":"turbo build"},"devDependencies":{"turbo":"^2.4.2"},"workspaces":["apps/*"]}
+{
+  "name": "biotill-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix apps/storefront run dev",
+    "build": "npm --prefix apps/storefront run build",
+    "start": "npm --prefix apps/storefront run start",
+    "lint": "npm --prefix apps/storefront run lint",
+    "backend:build": "npm run build --workspace=@dtc/backend",
+    "backend:start": "npm run start --workspace=@dtc/backend",
+    "storefront:build": "npm --prefix apps/storefront run build",
+    "storefront:start": "npm --prefix apps/storefront run start",
+    "seed": "npm run seed --workspace=@dtc/backend",
+    "backend:seed": "npm run seed --workspace=@dtc/backend",
+    "backend:dev": "npm run dev --workspace=@dtc/backend",
+    "test:unit": "npm run test:unit --workspace=@dtc/backend",
+    "test:integration": "npm run test:integration:http --workspace=@dtc/backend && npm run test:integration:modules --workspace=@dtc/backend",
+    "test:integration:http": "npm run test:integration:http --workspace=@dtc/backend",
+    "test:integration:modules": "npm run test:integration:modules --workspace=@dtc/backend",
+    "test:sale-order": "npm run test:sale-order --workspace=@dtc/backend",
+    "turbo:dev": "turbo dev",
+    "turbo:build": "turbo build"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.6",
+    "turbo": "^2.4.2"
+  },
+  "workspaces": ["apps/*"],
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}

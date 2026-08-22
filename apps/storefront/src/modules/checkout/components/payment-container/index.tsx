@@ -1,6 +1,7 @@
 import { Radio as RadioGroupOption } from "@headlessui/react"
 import { Text, clx } from "@modules/common/components/ui"
-import React, { useContext, useMemo, useState, type JSX } from "react"
+import React, { useContext, useMemo, useState, useEffect, type JSX } from "react"
+import QRCode from "qrcode"
 
 import Radio from "@modules/common/components/radio"
 import { isPhonePe, isPaytm, isUpi, isKisanCredit, isCodAgri } from "@lib/constants"
@@ -28,6 +29,14 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
   const [upiId, setUpiId] = useState("")
   const [kccNumber, setKccNumber] = useState("")
   const [activeTab, setActiveTab] = useState<"qr" | "vpa">("qr")
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("")
+
+  useEffect(() => {
+    const upiPayload = `upi://pay?pa=biotill@ybl&pn=BioTill%20Agri&cu=INR`
+    QRCode.toDataURL(upiPayload, { width: 96, margin: 1, color: { dark: "#064e3b", light: "#ffffff" } })
+      .then((url) => setQrCodeUrl(url))
+      .catch(() => {})
+  }, [])
 
   const info = paymentInfoMap[paymentProviderId]
 
@@ -124,30 +133,13 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
           {activeTab === "qr" ? (
             <div className="flex flex-col sm:flex-row items-center gap-4 bg-emerald-50/80 p-3 rounded-md border border-emerald-100">
               <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-xs flex flex-col items-center">
-                {/* Visual SVG QR Representation */}
-                <svg width="96" height="96" viewBox="0 0 96 96" className="text-emerald-900">
-                  <rect width="96" height="96" fill="white" />
-                  {/* Outer corners */}
-                  <rect x="8" y="8" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="4" rx="2" />
-                  <rect x="14" y="14" width="12" height="12" fill="currentColor" />
-                  <rect x="64" y="8" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="4" rx="2" />
-                  <rect x="70" y="14" width="12" height="12" fill="currentColor" />
-                  <rect x="8" y="64" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="4" rx="2" />
-                  <rect x="14" y="70" width="12" height="12" fill="currentColor" />
-                  {/* Data modules pattern */}
-                  <rect x="40" y="12" width="6" height="6" fill="currentColor" />
-                  <rect x="50" y="12" width="6" height="6" fill="currentColor" />
-                  <rect x="44" y="24" width="6" height="6" fill="currentColor" />
-                  <rect x="12" y="42" width="6" height="6" fill="currentColor" />
-                  <rect x="24" y="42" width="6" height="6" fill="currentColor" />
-                  <rect x="40" y="40" width="16" height="16" fill="#047857" rx="2" />
-                  <rect x="64" y="42" width="6" height="6" fill="currentColor" />
-                  <rect x="76" y="42" width="6" height="6" fill="currentColor" />
-                  <rect x="44" y="64" width="6" height="6" fill="currentColor" />
-                  <rect x="54" y="74" width="6" height="6" fill="currentColor" />
-                  <rect x="68" y="68" width="8" height="8" fill="currentColor" />
-                  <rect x="80" y="80" width="6" height="6" fill="currentColor" />
-                </svg>
+                {qrCodeUrl ? (
+                  <img src={qrCodeUrl} alt="UPI QR Code" width={96} height={96} className="rounded-md" />
+                ) : (
+                  <div className="w-24 h-24 bg-emerald-50 animate-pulse flex items-center justify-center text-[10px] text-emerald-800">
+                    Generating QR...
+                  </div>
+                )}
                 <span className="text-[10px] text-emerald-800 font-semibold mt-1">BHIM UPI QR</span>
               </div>
               <div className="flex-1 text-left">

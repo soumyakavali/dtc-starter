@@ -17,18 +17,6 @@ const AGRI_PAYMENT_PROVIDERS: HttpTypes.StorePaymentProvider[] = [
     id: "pp_upi_gpay",
     is_enabled: true,
   },
-  {
-    id: "pp_kisan_credit",
-    is_enabled: true,
-  },
-  {
-    id: "pp_system_default",
-    is_enabled: true,
-  },
-  {
-    id: "pp_cod_agri",
-    is_enabled: true,
-  },
 ]
 
 export const listCartPaymentMethods = async (regionId: string) => {
