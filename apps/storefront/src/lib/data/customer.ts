@@ -71,14 +71,9 @@ export const retrieveCustomer =
     }
 
     // Check local session
-    try {
-      const cookies = await nextCookies()
-      const farmerSession = cookies.get("_biotill_farmer_session")?.value
-      if (farmerSession) {
-        return JSON.parse(farmerSession) as HttpTypes.StoreCustomer
-      }
-    } catch {
-      // ignore
+    const farmerSession = await getFarmerSessionCookie()
+    if (farmerSession) {
+      return farmerSession as unknown as HttpTypes.StoreCustomer
     }
 
     return null

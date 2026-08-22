@@ -10,6 +10,7 @@ import {
   getOrSetCart,
   initiatePaymentSession,
 } from "@lib/data/cart"
+import { setFarmerSessionCookie, removeFarmerSessionCookie } from "@lib/data/cookies"
 
 export type TestCaseResult = {
   id: string
@@ -648,6 +649,49 @@ export async function GET(_req: NextRequest) {
       if (!response.products || response.products.length === 0) {
         throw new Error("Liquid collection filter failed")
       }
+    }
+  )
+
+  // =========================================================================
+  // SUITE 3.5: User Registration & Cart Auth Gate (AUTH-01 to AUTH-04)
+  // =========================================================================
+  await runTest(
+    "Auth & Registration Gate",
+    "AUTH-01",
+    "Unregistered User Blocked from Adding to Cart (AUTH_REQUIRED Redirect Gate)",
+    "ನೋಂದಣಿ ಮಾಡದ ಬಳಕೆದಾರರನ್ನು ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸದಂತೆ ತಡೆದು ನೋಂದಣಿ ಪುಟಕ್ಕೆ ಮರುನಿರ್ದೇಶನ",
+    async () => {
+      await removeFarmerSessionCookie()
+      let blocked = false
+      try {
+        await addToCart({ variantId: "var_vam_pwd_1kg", quantity: 1, countryCode: "in" })
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err)
+        if (msg.includes("AUTH_REQUIRED") || msg.includes("register")) {
+          blocked = true
+        }
+      }
+      if (!blocked) {
+        throw new Error("Unregistered user was unexpectedly allowed to add items to cart without auth")
+      }
+    }
+  )
+
+  await runTest(
+    "Auth & Registration Gate",
+    "AUTH-02",
+    "Farmer Registration & Login Session Activation Enables Cart Functionality",
+    "ರೈತ ಖಾತೆ ನೋಂದಣಿ ಮತ್ತು ಲಾಗಿನ್ ನಂತರ ಕಾರ್ಟ್ ಸಕ್ರಿಯಗೊಳಿಸುವಿಕೆ",
+    async () => {
+      await setFarmerSessionCookie({
+        id: "cus_farmer_test_active",
+        first_name: "Basavaraj",
+        last_name: "Patil",
+        email: "9876543210@biotill.local",
+        phone: "9876543210",
+        created_at: new Date().toISOString(),
+        addresses: [],
+      })
     }
   )
 

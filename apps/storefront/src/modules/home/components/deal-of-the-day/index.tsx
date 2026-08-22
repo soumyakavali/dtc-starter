@@ -4,7 +4,6 @@ import React, { useState } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import Image from "next/image"
-import { addToCart } from "@lib/data/cart"
 import { useRouter } from "next/navigation"
 
 type ProductItem = {
@@ -203,12 +202,14 @@ export default function DealOfTheDay({
   const [activeTab, setActiveTab] = useState<TabType>("all")
   const [addingId, setAddingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
+  const isSubmittingRef = React.useRef(false)
 
   const handleQuickAdd = async (product: ProductItem, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (addingId) return
+    if (isSubmittingRef.current || addingId) return
 
+    isSubmittingRef.current = true
     setAddingId(product.id)
     try {
       const res = await fetch("/api/cart", {
@@ -225,7 +226,8 @@ export default function DealOfTheDay({
       const data = await res.json()
 
       if (data.requireAuth || res.status === 401) {
-        router.push("/in/account?mode=register&redirect=/")
+        const currentPath = typeof window !== "undefined" ? window.location.pathname : "/in"
+        router.push(`/in/account?mode=register&redirect=${encodeURIComponent(currentPath)}`)
         return
       }
 
@@ -242,6 +244,7 @@ export default function DealOfTheDay({
       console.error("Quick add failed", err)
     } finally {
       setAddingId(null)
+      isSubmittingRef.current = false
     }
   }
 
@@ -350,8 +353,12 @@ export default function DealOfTheDay({
                 key={product.id}
                 className="group bg-white rounded-2xl border border-gray-200/90 hover:border-emerald-500 hover:shadow-xl transition-all duration-200 flex flex-col justify-between overflow-hidden relative"
               >
-                {/* Top Badge: Deal or Form */}
-                <div className="relative h-48 sm:h-52 w-full bg-emerald-50/50 overflow-hidden">
+                {/* Top Badge & Clickable Image */}
+                <LocalizedClientLink
+                  href={`/products/${product.handle}`}
+                  prefetch={true}
+                  className="block relative h-48 sm:h-52 w-full bg-emerald-50/50 overflow-hidden cursor-pointer"
+                >
                   <Image
                     src={product.thumbnail}
                     alt={product.title}
@@ -382,11 +389,15 @@ export default function DealOfTheDay({
                     <span>{product.rating}</span>
                     <span className="text-gray-400 text-[10px]">({product.reviewsCount})</span>
                   </div>
-                </div>
+                </LocalizedClientLink>
 
                 {/* Content */}
                 <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between gap-3">
-                  <div>
+                  <LocalizedClientLink
+                    href={`/products/${product.handle}`}
+                    prefetch={true}
+                    className="block cursor-pointer group-hover:text-emerald-700 transition-colors"
+                  >
                     <h3 className="font-bold text-gray-900 text-sm sm:text-base group-hover:text-emerald-700 transition-colors leading-snug">
                       {product.title}
                     </h3>
@@ -406,7 +417,7 @@ export default function DealOfTheDay({
                         {product.crops}
                       </p>
                     </div>
-                  </div>
+                  </LocalizedClientLink>
 
                   {/* Price & Action */}
                   <div className="pt-3 border-t border-gray-100 flex flex-col gap-2 mt-auto">
