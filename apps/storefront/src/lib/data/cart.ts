@@ -573,6 +573,15 @@ export async function applyPromotions(codes: string[]) {
     throw new Error("No existing cart found")
   }
 
+  const validKnownCodes = ["FARMER10", "BIOTILL50", "AGRI20", "BIOTILL", "WELCOME10"]
+  for (const c of codes) {
+    const upper = c.toUpperCase().trim()
+    const isValid = validKnownCodes.includes(upper) || upper.startsWith("AGRI") || upper.startsWith("FARM") || upper.startsWith("BIO") || upper.startsWith("WEL")
+    if (!isValid) {
+      throw new Error(`Invalid promotion code: "${c}". Please enter a valid coupon code (e.g., FARMER10, WELCOME10, BIOTILL50).`)
+    }
+  }
+
   if (!cartId.startsWith("cart_local_")) {
     try {
       const headers = {

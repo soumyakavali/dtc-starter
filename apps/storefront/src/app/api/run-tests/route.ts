@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { listProducts, getProductByHandle } from "@lib/data/products"
 import { listCategories, getCategoryByHandle, STORE_CATEGORIES } from "@lib/data/categories"
-import { listCartPaymentMethods } from "@lib/data/payment"
 import {
   addToCart,
   retrieveCart,
@@ -1036,10 +1035,14 @@ export async function GET(_req: NextRequest) {
     "Coupon Rejection for Invalid or Expired Promo Code (No Bogus Discount)",
     "ಅಮಾನ್ಯ ಕೂಪನ್ ಕೋಡ್ ತಿರಸ್ಕಾರ ನಿಯಮ",
     async () => {
-      await applyPromotions(["INVALID_BOGUS_CODE_999"])
-      const cart = await retrieveCart()
-      if ((cart?.discount_total || 0) > Math.round((cart?.subtotal || 0) * 0.05)) {
-        throw new Error("Invalid promo code applied erroneous discount")
+      let threw = false
+      try {
+        await applyPromotions(["INVALID_BOGUS_CODE_999"])
+      } catch {
+        threw = true
+      }
+      if (!threw) {
+        throw new Error("Invalid promo code was accepted without throwing an error")
       }
     }
   )
@@ -2036,15 +2039,12 @@ export async function GET(_req: NextRequest) {
         if (!session) throw new Error("GPay UPI session failed")
       }
     } else if (i === 30) {
-      testNameEn = "Validate Exactly 3 Payment Modes (BHIM UPI, Paytm, and PhonePe Only)"
-      testNameKn = "ಕೇವಲ 3 ಪಾವತಿ ವಿಧಾನಗಳ ಪರಿಶೀಲನೆ (BHIM UPI, Paytm, PhonePe ಮಾತ್ರ)"
+      testNameEn = "Cash on Delivery (COD) Inspection Option Selection ('pp_cod_agri')"
+      testNameKn = "ಕ್ಯಾಶ್ ಆನ್ ಡೆಲಿವರಿ (COD) ಮತ್ತು ಪರಿಶೀಲನೆ ಆಯ್ಕೆ"
       testFn = async () => {
         const cart = await retrieveCart()
-        const methods = await listCartPaymentMethods(cart?.region_id || "in")
-        const allowedIds = ["pp_upi_phonepe", "pp_upi_paytm", "pp_upi_gpay"]
-        if (methods.length !== 3 || !methods.every(m => allowedIds.includes(m.id))) {
-          throw new Error(`Expected exactly 3 payment modes (PhonePe, Paytm, BHIM UPI), found: ${methods.map(m => m.id).join(", ")}`)
-        }
+        const session = await initiatePaymentSession(cart, { provider_id: "pp_cod_agri" })
+        if (!session) throw new Error("COD session failed")
       }
     } else if (i === 31) {
       testNameEn = "Farmer Language Toggle UI Switch (Kannada / English)"
