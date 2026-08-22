@@ -35,8 +35,14 @@ const Payment = ({
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
-    activeSession?.provider_id ?? ""
+    activeSession?.provider_id || availablePaymentMethods?.[0]?.id || "pp_upi_phonepe"
   )
+
+  useEffect(() => {
+    if (!selectedPaymentMethod && availablePaymentMethods?.[0]?.id) {
+      setSelectedPaymentMethod(availablePaymentMethods[0].id)
+    }
+  }, [availablePaymentMethods, selectedPaymentMethod])
 
   const searchParams = useSearchParams()
   const router = useRouter()

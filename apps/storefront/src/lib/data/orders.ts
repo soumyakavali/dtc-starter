@@ -3,6 +3,7 @@
 import { sdk } from "@lib/config"
 import { getAuthHeaders, getCacheOptions, getLastOrderData } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
+import { DEMO_ORDERS } from "./mock-data"
 
 export const retrieveOrder = async (id: string) => {
   try {
@@ -36,7 +37,20 @@ export const retrieveOrder = async (id: string) => {
   }
 
   // Fallback to locally placed order
-  return await getLastOrderData(id)
+  const lastOrder = await getLastOrderData(id)
+  if (lastOrder && (lastOrder.id === id || String(lastOrder.display_id) === id)) {
+    return lastOrder
+  }
+
+  // Check demo orders
+  const demoOrder = DEMO_ORDERS.find(
+    (o) => o.id === id || String(o.display_id) === id
+  )
+  if (demoOrder) {
+    return demoOrder
+  }
+
+  return lastOrder || null
 }
 
 export const listOrders = async (
@@ -44,6 +58,7 @@ export const listOrders = async (
   offset: number = 0,
   filters?: Record<string, unknown>
 ) => {
+  let backendOrders: HttpTypes.StoreOrder[] = []
   try {
     const headers = {
       ...(await getAuthHeaders()),
@@ -53,7 +68,7 @@ export const listOrders = async (
       ...(await getCacheOptions("orders")),
     }
 
-    return await sdk.client
+    backendOrders = await sdk.client
       .fetch<HttpTypes.StoreOrderListResponse>(`/store/orders`, {
         method: "GET",
         query: {
@@ -70,8 +85,23 @@ export const listOrders = async (
       .then(({ orders }) => orders || [])
       .catch(() => [])
   } catch {
-    return []
+    backendOrders = []
   }
+
+  const lastOrder = await getLastOrderData()
+  const combined: HttpTypes.StoreOrder[] = [...backendOrders]
+
+  if (lastOrder && !combined.some((o) => o.id === lastOrder.id)) {
+    combined.unshift(lastOrder)
+  }
+
+  DEMO_ORDERS.forEach((demo) => {
+    if (!combined.some((o) => o.id === demo.id)) {
+      combined.push(demo)
+    }
+  })
+
+  return combined.slice(offset, offset + limit)
 }
 
 export const createTransferRequest = async (

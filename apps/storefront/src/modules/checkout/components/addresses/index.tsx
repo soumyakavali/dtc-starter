@@ -25,7 +25,8 @@ const Addresses = ({
   const router = useRouter()
   const pathname = usePathname()
 
-  const isOpen = searchParams.get("step") === "address"
+  const currentStep = searchParams.get("step")
+  const isOpen = !cart?.shipping_address || currentStep === "address" || !currentStep
 
   const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
     cart?.shipping_address && cart?.billing_address

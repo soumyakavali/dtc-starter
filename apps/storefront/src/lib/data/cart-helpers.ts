@@ -159,8 +159,12 @@ export function calculateCartTotals(cart: Partial<HttpTypes.StoreCart> & Record<
 
   const subtotal = items.reduce((acc: number, item) => acc + (item.total || 0), 0)
 
+  const rawPromos = ((cart.promotions || cart.promo_codes || []) as (string | { code?: string; id?: string })[])
+  const promoCodes = rawPromos
+    .map((p) => (typeof p === "string" ? p : p.code || ""))
+    .filter(Boolean)
+
   let discount_total = 0
-  const promoCodes = ((cart.promotions || cart.promo_codes || []) as string[])
   if (promoCodes.some((c: string) => c.toUpperCase() === "FARMER10")) {
     discount_total = Math.round(subtotal * 0.1)
   } else if (promoCodes.some((c: string) => c.toUpperCase() === "BIOTILL50")) {
@@ -168,6 +172,15 @@ export function calculateCartTotals(cart: Partial<HttpTypes.StoreCart> & Record<
   } else if (promoCodes.length > 0) {
     discount_total = Math.round(subtotal * 0.05)
   }
+
+  const promotions = promoCodes.map((code) => ({
+    id: `promo_${code.toLowerCase()}`,
+    code: code.toUpperCase(),
+    application_method: {
+      type: "percentage",
+      value: 10,
+    },
+  }))
 
   const isFreeDelivery = subtotal >= 999
   const shipping_total = items.length === 0 ? 0 : isFreeDelivery ? 0 : 70
@@ -181,6 +194,8 @@ export function calculateCartTotals(cart: Partial<HttpTypes.StoreCart> & Record<
     region_id: activeRegion.id,
     region: activeRegion,
     items,
+    promotions,
+    promo_codes: promoCodes,
     subtotal,
     discount_total,
     shipping_total,

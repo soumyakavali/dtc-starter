@@ -48,6 +48,7 @@ export default function CategoryTemplate({
         sortBy={sort}
         currentCategoryHandle={category.handle}
         data-testid="sort-by-container"
+        hideSortBy={true}
         hideOptionsPicker
       />
       <div className="w-full">

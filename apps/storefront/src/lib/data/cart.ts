@@ -573,9 +573,17 @@ export async function applyPromotions(codes: string[]) {
 
   const localCart = await getLocalCartData()
   if (localCart) {
+    const promoObjs = codes.map((code) => ({
+      id: `promo_${code.toLowerCase()}`,
+      code: code.toUpperCase(),
+      application_method: {
+        type: "percentage",
+        value: 10,
+      },
+    }))
     const updated = {
       ...localCart,
-      promotions: codes,
+      promotions: promoObjs,
       promo_codes: codes,
     }
     const recalculated = calculateCartTotals(updated)

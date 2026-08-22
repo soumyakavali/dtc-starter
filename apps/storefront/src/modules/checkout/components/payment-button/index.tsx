@@ -75,6 +75,17 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   }
 }
 
+const isRedirectError = (err: unknown) => {
+  if (!err || typeof err !== "object") return false
+  const msg = (err as Record<string, unknown>).message
+  const digest = (err as Record<string, unknown>).digest
+  return (
+    msg === "NEXT_REDIRECT" ||
+    (typeof msg === "string" && msg.includes("NEXT_REDIRECT")) ||
+    (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT"))
+  )
+}
+
 /* PhonePe Interactive Payment Button & Modal */
 const PhonePePaymentButton = ({
   cart,
@@ -97,12 +108,14 @@ const PhonePePaymentButton = ({
       setStep("success")
       setTimeout(async () => {
         await placeOrder().catch((err) => {
-          setErrorMessage(err.message)
-          setSubmitting(false)
-          setStep("scan")
+          if (!isRedirectError(err)) {
+            setErrorMessage(err?.message || "Payment authorization failed")
+            setSubmitting(false)
+            setStep("scan")
+          }
         })
-      }, 1200)
-    }, 1500)
+      }, 1000)
+    }, 1200)
   }
 
   return (
@@ -230,12 +243,14 @@ const PaytmPaymentButton = ({
       setStep("success")
       setTimeout(async () => {
         await placeOrder().catch((err) => {
-          setErrorMessage(err.message)
-          setSubmitting(false)
-          setStep("scan")
+          if (!isRedirectError(err)) {
+            setErrorMessage(err?.message || "Payment authorization failed")
+            setSubmitting(false)
+            setStep("scan")
+          }
         })
-      }, 1200)
-    }, 1500)
+      }, 1000)
+    }, 1200)
   }
 
   return (
@@ -340,7 +355,10 @@ const UpiPaymentButton = ({
     setSubmitting(true)
     await placeOrder()
       .catch((err) => {
-        setErrorMessage(err.message)
+        if (!isRedirectError(err)) {
+          setErrorMessage(err?.message || "Payment failed")
+          setSubmitting(false)
+        }
       })
       .finally(() => {
         setSubmitting(false)
@@ -384,7 +402,10 @@ const ManualTestPaymentButton = ({
   const onPaymentCompleted = async () => {
     await placeOrder()
       .catch((err) => {
-        setErrorMessage(err.message)
+        if (!isRedirectError(err)) {
+          setErrorMessage(err?.message || "Order placement failed")
+          setSubmitting(false)
+        }
       })
       .finally(() => {
         setSubmitting(false)
@@ -438,7 +459,10 @@ const StripePaymentButton = ({
   const onPaymentCompleted = async () => {
     await placeOrder()
       .catch((err) => {
-        setErrorMessage(err.message)
+        if (!isRedirectError(err)) {
+          setErrorMessage(err?.message || "Payment processing failed")
+          setSubmitting(false)
+        }
       })
       .finally(() => {
         setSubmitting(false)

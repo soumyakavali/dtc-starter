@@ -23,7 +23,7 @@ type RefinementListProps = {
 const RefinementList = ({
   sortBy,
   hideOptionsPicker = false,
-  hideSortBy = false,
+  hideSortBy = true,
   currentCategoryHandle,
   "data-testid": dataTestId,
 }: RefinementListProps) => {

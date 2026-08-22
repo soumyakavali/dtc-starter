@@ -4,6 +4,42 @@ import { sdk } from "@lib/config"
 import { HttpTypes } from "@medusajs/types"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 
+const AGRI_FALLBACK_SHIPPING_OPTIONS: HttpTypes.StoreCartShippingOption[] = [
+  {
+    id: "so_agri_express",
+    name: "Kisan Rural Express (Free Delivery on Orders ₹999+ / 2-3 Days / ಗ್ರಾಮೀಣ ಎಕ್ಸ್‌ಪ್ರೆಸ್)",
+    amount: 0,
+    is_tax_inclusive: true,
+    price_type: "flat",
+    data: {
+      type: "express",
+      estimated_days: "2-3 Days",
+    },
+  } as unknown as HttpTypes.StoreCartShippingOption,
+  {
+    id: "so_hub_pickup",
+    name: "Direct Agri Depot Pickup (BioTill Mandya / Hubballi Hub - ₹0 / ಡಿಪೋ ಸಂಗ್ರಹ)",
+    amount: 0,
+    is_tax_inclusive: true,
+    price_type: "flat",
+    data: {
+      type: "pickup",
+      estimated_days: "Instant",
+    },
+  } as unknown as HttpTypes.StoreCartShippingOption,
+  {
+    id: "so_agri_priority",
+    name: "Priority Karnataka Farm Dispatch (Same-Day / ₹49 / ವೇಗದ ವಿತರಣೆ)",
+    amount: 49,
+    is_tax_inclusive: true,
+    price_type: "flat",
+    data: {
+      type: "priority",
+      estimated_days: "1 Day",
+    },
+  } as unknown as HttpTypes.StoreCartShippingOption,
+]
+
 export const listCartShippingMethods = async (cartId: string) => {
   const headers = {
     ...(await getAuthHeaders()),
@@ -26,9 +62,14 @@ export const listCartShippingMethods = async (cartId: string) => {
         cache: "force-cache",
       }
     )
-    .then(({ shipping_options }) => shipping_options)
+    .then(({ shipping_options }) => {
+      if (!shipping_options || shipping_options.length === 0) {
+        return AGRI_FALLBACK_SHIPPING_OPTIONS
+      }
+      return shipping_options
+    })
     .catch(() => {
-      return null
+      return AGRI_FALLBACK_SHIPPING_OPTIONS
     })
 }
 

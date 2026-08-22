@@ -76,12 +76,17 @@ const ShippingAddress = ({
     // Ensure cart is not null and has a shipping_address before setting form data
     if (cart && cart.shipping_address) {
       setFormAddress(cart?.shipping_address, cart?.email)
+    } else if (customer && customer.addresses && customer.addresses.length > 0) {
+      const defaultAddr = customer.addresses.find((a) => a.is_default_shipping) || customer.addresses[0]
+      if (defaultAddr) {
+        setFormAddress(defaultAddr as unknown as HttpTypes.StoreCartAddress, customer.email)
+      }
     }
 
     if (cart && !cart.email && customer?.email) {
       setFormAddress(undefined, customer.email)
     }
-  }, [cart]) // Add cart as a dependency
+  }, [cart, customer])
 
   const handleChange = (
     e: React.ChangeEvent<
