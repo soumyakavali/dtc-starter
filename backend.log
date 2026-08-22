@@ -1,0 +1,18 @@
+
+> @dtc/backend@0.0.1 dev
+> medusa develop
+
+[32minfo[39m:    redisUrl not found. A fake redis instance will be used.
+[32minfo[39m:    [Watcher] Using standard dev server (restart on file change)
+[32minfo[39m:    [Watcher] Watching filesystem to reload dev server on file change
+[32minfo[39m:    redisUrl not found. A fake redis instance will be used.
+- Creating server
+[32minfo[39m:    redisUrl not found. A fake redis instance will be used.
+[32minfo[39m:    Skipping instrumentation registration. No register function found.
+[32minfo[39m:    redisUrl not found. A fake redis instance will be used.
+[33mwarn[39m:    Pg connection failed to connect to the database. Retrying...
+{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"postgres"}
+(pool reported: Knex: Timeout acquiring a connection. The pool is probably full. Are you missing a .transacting(trx) call?)
+[33mwarn[39m:    Pg connection failed to connect to the database. Retrying...
+{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"postgres"}
+(pool reported: Knex: Timeout acquiring a connection. The pool is probably full. Are you missing a .transacting(trx) call?)
