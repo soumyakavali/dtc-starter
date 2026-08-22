@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { listProducts, getProductByHandle } from "@lib/data/products"
 import { listCategories, getCategoryByHandle, STORE_CATEGORIES } from "@lib/data/categories"
+
+export const dynamic = 'force-dynamic'
+
 import {
   addToCart,
   retrieveCart,

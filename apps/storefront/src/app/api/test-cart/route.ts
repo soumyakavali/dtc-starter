@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { runCartUITestSuite } from "@lib/data/__tests__/cart-flow.spec"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const results = await runCartUITestSuite()

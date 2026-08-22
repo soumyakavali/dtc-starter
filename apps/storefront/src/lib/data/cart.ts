@@ -596,7 +596,13 @@ export async function applyPromotions(codes: string[]) {
     }
   }
 
-  const localCart = (await getLocalCartData()) || (await retrieveCart()).catch(() => null)
+  let remoteCart = null
+  try {
+    remoteCart = await retrieveCart()
+  } catch {
+    remoteCart = null
+  }
+  const localCart = (await getLocalCartData()) || remoteCart
   const cartToUse = localCart || { id: cartId, items: [] }
 
   const updated = {

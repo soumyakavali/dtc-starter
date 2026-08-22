@@ -19,8 +19,12 @@ const Overview = ({ customer, orders }: OverviewProps) => {
 
   return (
     <div data-testid="overview-page-wrapper" className="w-full">
-      <div className="bg-gradient-to-r from-emerald-800 to-emerald-950 text-white rounded-2xl p-6 mb-6 shadow-md">
-        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+      {/* Farmer Greeting Hero Banner */}
+      <div className="bg-gradient-to-r from-emerald-800 to-emerald-950 text-white rounded-2xl p-6 mb-6 shadow-md relative overflow-hidden">
+        <div className="absolute right-4 bottom-4 text-emerald-900/40 text-8xl font-black select-none pointer-events-none">
+          🌾
+        </div>
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 relative z-10">
           <div>
             <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-emerald-700/60 rounded-full text-xs font-semibold text-emerald-200 mb-2">
               <span>🌾</span> Verified BioTill Farmer / ನೋಂದಾಯಿತ ರೈತರು
@@ -29,24 +33,43 @@ const Overview = ({ customer, orders }: OverviewProps) => {
               Namaskara, {customer?.first_name || "Farmer"} {customer?.last_name || ""}!
             </h2>
             <p className="text-emerald-200 text-sm mt-0.5">
-              ನಮಸ್ಕಾರ, ಬಯೋಟೀಲ್ ಕೃಷಿ ಪೋರ್ಟಲ್‌ಗೆ ಸುಸ್ವಾಗತ
+              ನಮಸ್ಕಾರ, ಬಯೋಟೀಲ್ ಕೃಷಿ ಪೋರ್ಟಲ್‌ಗೆ ಸುಸ್ವಾಗತ • Karnataka Agro Region
             </p>
           </div>
-          <div className="bg-emerald-900/80 border border-emerald-700/50 rounded-xl px-4 py-3 text-right">
-            <span className="text-xs text-emerald-300 block">Mobile / Username:</span>
-            <span className="font-mono font-bold text-white text-base">{displayIdentifier}</span>
+          <div className="flex items-center gap-3">
+            <div className="bg-emerald-900/80 border border-emerald-700/50 rounded-xl px-4 py-3 text-right">
+              <span className="text-xs text-emerald-300 block">Mobile / Username:</span>
+              <span className="font-mono font-bold text-white text-base">{displayIdentifier}</span>
+            </div>
+            <LocalizedClientLink
+              href="/account/profile"
+              className="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-3 rounded-xl text-xs font-bold transition shadow"
+            >
+              Edit Profile
+            </LocalizedClientLink>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl font-bold">
             📦
           </div>
           <div>
-            <span className="text-xs text-gray-500 font-medium">Total Orders / ಒಟ್ಟು ಆರ್ಡರ್</span>
+            <span className="text-xs text-gray-500 font-medium">Total Orders / ಆರ್ಡರ್</span>
             <div className="text-2xl font-bold text-gray-900">{orders?.length || 0}</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl font-bold">
+            🌱
+          </div>
+          <div>
+            <span className="text-xs text-gray-500 font-medium">Active Subsidy</span>
+            <div className="text-sm font-bold text-emerald-800">50% Bio-Subsidy Active</div>
           </div>
         </div>
 
@@ -69,21 +92,21 @@ const Overview = ({ customer, orders }: OverviewProps) => {
             📞
           </div>
           <div>
-            <span className="text-xs text-gray-500 font-medium">Agri Support Helpline</span>
+            <span className="text-xs text-gray-500 font-medium">Agri Helpline</span>
             <div className="text-sm font-bold text-emerald-700">+91 800 123 4567</div>
           </div>
         </div>
       </div>
 
-      {/* Farmer Agri Metadata Card */}
-      {customer?.metadata && (
-        <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5 mb-8">
+      {/* Farmer Agri Metadata & Weather Advisory Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="lg:col-span-2 bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-950 flex items-center gap-1.5">
               <span>🌾</span> Farm Profile & Landholding / ಕೃಷಿ ವಿವರಗಳು
             </h4>
             <span className="text-[11px] font-semibold bg-emerald-100 text-emerald-900 px-2.5 py-0.5 rounded-full border border-emerald-300">
-              {String(customer.metadata.member_tier || "BioTill Verified")}
+              {String(customer?.metadata?.member_tier || "BioTill Verified Farmer")}
             </span>
           </div>
 
@@ -91,46 +114,74 @@ const Overview = ({ customer, orders }: OverviewProps) => {
             <div className="bg-white p-3 rounded-xl border border-emerald-100">
               <span className="text-gray-400 block text-[10px]">District & Taluk</span>
               <span className="font-bold text-gray-800">
-                {String(customer.metadata.district || "Mandya")}, {String(customer.metadata.taluk || "Maddur")}
+                {String(customer?.metadata?.district || "Mandya")}, {String(customer?.metadata?.taluk || "Maddur")}
               </span>
             </div>
 
             <div className="bg-white p-3 rounded-xl border border-emerald-100">
               <span className="text-gray-400 block text-[10px]">Primary Crops</span>
               <span className="font-bold text-emerald-800">
-                {String(customer.metadata.primary_crop || "Sugarcane & Paddy")}
+                {String(customer?.metadata?.primary_crop || "Sugarcane & Paddy")}
               </span>
             </div>
 
             <div className="bg-white p-3 rounded-xl border border-emerald-100">
               <span className="text-gray-400 block text-[10px]">Landholding</span>
               <span className="font-bold text-gray-800">
-                {String(customer.metadata.landholding_acres || "4.5 Acres")}
+                {String(customer?.metadata?.landholding_acres || "4.5 Acres")}
               </span>
             </div>
 
             <div className="bg-white p-3 rounded-xl border border-emerald-100">
-              <span className="text-gray-400 block text-[10px]">Kisan Status</span>
+              <span className="text-gray-400 block text-[10px]">Kisan Card Status</span>
               <span className="font-bold text-emerald-700">
-                {String(customer.metadata.kisan_card_status || "Verified")}
+                {String(customer?.metadata?.kisan_card_status || "Verified")}
               </span>
             </div>
           </div>
         </div>
-      )}
+
+        <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-950">
+                🌦️ Rural Weather Advisory
+              </span>
+              <span className="text-[10px] font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
+                Live Karnataka
+              </span>
+            </div>
+            <p className="text-xs text-amber-900 leading-relaxed">
+              Favorable conditions for organic bio-fungicide spraying in paddy and sugarcane plots over the next 48 hours. Avoid heavy chemical runoff.
+            </p>
+          </div>
+          <div className="mt-4 pt-3 border-t border-amber-200/60 flex items-center justify-between text-xs font-semibold text-amber-800">
+            <span>Soil Moisture: Optimal</span>
+            <span>Temp: 28°C ☁️</span>
+          </div>
+        </div>
+      </div>
 
       <div className="flex flex-col py-4 border-t border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Recent Orders / ಇತ್ತೀಚಿನ ಆರ್ಡರ್‌ಗಳು</h3>
+            <h3 className="text-lg font-bold text-gray-900">Recent Orders & Dispatches / ಇತ್ತೀಚಿನ ಆರ್ಡರ್‌ಗಳು</h3>
             <p className="text-xs text-gray-500">Track bio-fertilizer and pesticide farm dispatches</p>
           </div>
-          <LocalizedClientLink
-            href="/store"
-            className="text-xs font-bold text-emerald-700 hover:underline bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200"
-          >
-            + Order Products / ಉತ್ಪನ್ನಗಳ ಖರೀದಿ
-          </LocalizedClientLink>
+          <div className="flex items-center gap-2">
+            <LocalizedClientLink
+              href="/account/orders"
+              className="text-xs font-bold text-gray-700 hover:text-emerald-700 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200"
+            >
+              View All Orders
+            </LocalizedClientLink>
+            <LocalizedClientLink
+              href="/store"
+              className="text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 px-3 py-1.5 rounded-lg shadow transition"
+            >
+              + Order Products / ಉತ್ಪನ್ನಗಳ ಖರೀದಿ
+            </LocalizedClientLink>
+          </div>
         </div>
 
         <ul className="flex flex-col gap-y-3" data-testid="orders-wrapper">

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { retrieveCustomer } from "@lib/data/customer"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const customer = await retrieveCustomer().catch(() => null)
