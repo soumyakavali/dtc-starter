@@ -1,0 +1,31 @@
+# Dependencies and cache
+node_modules
+.next
+.turbo
+dist
+out
+build
+coverage
+
+# Version Control and IDEs
+.git
+.gitignore
+.github
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files
+.env*.local
+.env
+
+# Logs and debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+
+# Temporary files
+*.tsbuildinfo

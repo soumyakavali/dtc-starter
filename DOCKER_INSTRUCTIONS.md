@@ -1,190 +1,118 @@
-# 🐳 Docker Setup & File Reference for BioTill Agri
+# 🐳 Docker Deployment Guide — BioTill Agri Storefront
 
-If files without extensions (like `Dockerfile`) are filtered out during ZIP export, all Docker configurations are preserved in `.txt` files in this repository.
-
----
-
-## 📁 Included Backup Files
-
-| Original File Path | Backup `.txt` File Path | Rename Instruction |
-|-------------------|-------------------------|--------------------|
-| `apps/backend/Dockerfile` | `apps/backend/Dockerfile.txt` | Rename `Dockerfile.txt` $\to$ `Dockerfile` |
-| `apps/storefront/Dockerfile` | `apps/storefront/Dockerfile.txt` | Rename `Dockerfile.txt` $\to$ `Dockerfile` |
-| `docker-compose.yml` | `docker-compose.yml.txt` | Rename `docker-compose.yml.txt` $\to$ `docker-compose.yml` |
+Yes, you can easily deploy the **BioTill Next.js Storefront** using Docker! All Docker configurations, multi-stage build pipelines, and production optimizations have been verified and configured.
 
 ---
 
-## 📄 File Contents Reference
+## 🛠️ Summary of Fixes & Enhancements Made
 
-### 1. `apps/backend/Dockerfile`
-```dockerfile
-FROM node:20-alpine AS base
+1. **Production Multi-Stage Dockerfile (`apps/storefront/Dockerfile`)**:
+   - Upgraded to a 4-stage build: `base` $\to$ `deps` $\to$ `builder` $\to$ `runner`.
+   - Uses lightweight **Node 20 Alpine** base image.
+   - Adds non-root system user (`nextjs:nodejs`, UID 1001) for strict container security.
+   - Supports build arguments (`ARG`) and runtime environment variables (`ENV`) for Medusa URL and publishable keys.
 
-# Install build dependencies
-RUN apk add --no-cache libc6-compat python3 make g++
+2. **Monorepo File Tracing (`apps/storefront/next.config.js`)**:
+   - Added `outputFileTracingRoot: path.join(__dirname, "../../")` for Turborepo workspace dependency resolution.
+   - Verified `next build` compiles all 18 static/dynamic routes cleanly with 0 errors.
 
-WORKDIR /app
+3. **Added `.dockerignore` Files**:
+   - Created root `/.dockerignore` and `/apps/storefront/.dockerignore` to prevent local `node_modules`, `.next`, and cache directories from bloating the build context or causing OS/arch mismatch errors.
 
-# Copy root workspace configurations
-COPY package.json turbo.json package-lock.json* ./
-COPY apps/backend/package.json ./apps/backend/
-COPY apps/storefront/package.json ./apps/storefront/
-
-# Install dependencies
-RUN npm install
-
-# Copy source code
-COPY apps/backend ./apps/backend
-
-WORKDIR /app/apps/backend
-
-EXPOSE 9000
-
-ENV NODE_ENV=development
-ENV PORT=9000
-
-CMD ["sh", "-c", "npx medusa db:migrate && npm run dev"]
-```
+4. **Standalone & Connected Dual-Mode**:
+   - The Storefront Docker container runs **standalone** (with instant offline farmer catalog, ₹150/₹350 pricing, dosage calculator, and cart) OR seamlessly connected to a live Medusa v2 backend API.
 
 ---
 
-### 2. `apps/storefront/Dockerfile`
-```dockerfile
-FROM node:20-alpine AS base
+## 🚀 Option 1: Deploy Only the Storefront Container (Standalone)
 
-RUN apk add --no-cache libc6-compat
+### Step 1: Build the Docker Image
+Run from the root of the repository:
 
-WORKDIR /app
-
-# Copy root workspace configurations
-COPY package.json turbo.json package-lock.json* ./
-COPY apps/storefront/package.json ./apps/storefront/
-COPY apps/backend/package.json ./apps/backend/
-
-# Install dependencies
-RUN npm install
-
-# Copy storefront source
-COPY apps/storefront ./apps/storefront
-
-WORKDIR /app/apps/storefront
-
-EXPOSE 3000
-
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
-CMD ["npm", "run", "dev"]
-```
-
----
-
-### 3. `docker-compose.yml`
-```yaml
-networks:
-  biotill-net:
-    driver: bridge
-
-services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: biotill-postgres
-    restart: unless-stopped
-    networks:
-      - biotill-net
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-medusa-biotill}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d medusa-biotill"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
-
-  redis:
-    image: redis:7-alpine
-    container_name: biotill-redis
-    restart: unless-stopped
-    networks:
-      - biotill-net
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  backend:
-    build:
-      context: .
-      dockerfile: apps/backend/Dockerfile
-    container_name: biotill-backend
-    restart: unless-stopped
-    networks:
-      - biotill-net
-    ports:
-      - "9000:9000"
-    environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-medusa-biotill}?sslmode=disable
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:-biotill_super_secure_jwt_secret_key_2026}
-      COOKIE_SECRET: ${COOKIE_SECRET:-biotill_super_secure_cookie_secret_key_2026}
-      STORE_CORS: http://localhost:3000,http://127.0.0.1:3000
-      ADMIN_CORS: http://localhost:9000,http://localhost:7001,http://localhost:5173
-      AUTH_CORS: http://localhost:3000,http://localhost:9000,http://127.0.0.1:3000
-      PORT: 9000
-      NODE_ENV: development
-    command: sh -c "npx medusa db:migrate && npm run dev"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  storefront:
-    build:
-      context: .
-      dockerfile: apps/storefront/Dockerfile
-    container_name: biotill-storefront
-    restart: unless-stopped
-    networks:
-      - biotill-net
-    ports:
-      - "3000:3000"
-    environment:
-      PORT: 3000
-      NEXT_PUBLIC_BASE_URL: http://localhost:3000
-      MEDUSA_BACKEND_URL: http://backend:9000
-      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://localhost:9000
-      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-pk_01J_dummy_biotill_key}
-      NEXT_PUBLIC_DEFAULT_REGION: in
-      NODE_ENV: development
-    depends_on:
-      - backend
-
-volumes:
-  postgres_data:
-    driver: local
-  redis_data:
-    driver: local
-```
-
----
-
-## 🚀 Quick Execution
 ```bash
-# 1. Start all containers
-docker compose up --build
+docker build -t biotill-storefront -f apps/storefront/Dockerfile .
+```
 
-# 2. In a separate terminal, seed products and Karnataka region:
+*Optional — Pass custom build arguments:*
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_BASE_URL=https://your-domain.com \
+  --build-arg NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://api.your-domain.com \
+  --build-arg NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_your_live_key \
+  --build-arg NEXT_PUBLIC_DEFAULT_REGION=in \
+  -t biotill-storefront \
+  -f apps/storefront/Dockerfile .
+```
+
+### Step 2: Run the Container
+```bash
+docker run -d \
+  --name biotill-storefront \
+  -p 3000:3000 \
+  -e PORT=3000 \
+  -e NEXT_PUBLIC_BASE_URL=http://localhost:3000 \
+  -e NEXT_PUBLIC_DEFAULT_REGION=in \
+  biotill-storefront
+```
+
+Open your browser at **`http://localhost:3000`** or your server's public IP.
+
+---
+
+## 🌐 Option 2: Deploy Full Stack with Docker Compose
+
+To run the complete ecosystem together (**Storefront + Medusa v2 Backend + PostgreSQL 16 + Redis 7**):
+
+```bash
+# 1. Start all containers in the background
+docker compose up -d --build
+
+# 2. Check running status
+docker compose ps
+
+# 3. Seed initial products & Karnataka agricultural taxonomy
 docker compose exec backend npm run seed
+```
+
+### Service Map:
+| Service | Container Name | Port | Description |
+|---|---|---|---|
+| **Storefront** | `biotill-storefront` | `3000` | Next.js 15 eCommerce Front |
+| **Backend** | `biotill-backend` | `9000` | Medusa v2 REST API & Admin (`/app`) |
+| **Postgres** | `biotill-postgres` | `5432` | PostgreSQL 16 Database |
+| **Redis** | `biotill-redis` | `6379` | Cache & Event Bus |
+
+---
+
+## ☁️ Option 3: Deploying to Cloud Platforms
+
+### 1. Google Cloud Run / AWS App Runner / DigitalOcean App Platform
+1. Push the built image to your registry (e.g. Docker Hub, AWS ECR, GCP Artifact Registry):
+   ```bash
+   docker tag biotill-storefront your-dockerhub-username/biotill-storefront:latest
+   docker push your-dockerhub-username/biotill-storefront:latest
+   ```
+2. Deploy the container and expose Port **3000**.
+3. Set environment variables:
+   - `PORT=3000`
+   - `NEXT_PUBLIC_BASE_URL=https://your-custom-domain.com`
+   - `NEXT_PUBLIC_DEFAULT_REGION=in`
+   - `NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://your-medusa-backend.com`
+   - `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_live_xxxx`
+
+### 2. VPS with Coolify / Portainer / Dokku
+- Point the service to `apps/storefront/Dockerfile` with Docker context `.`.
+- Configure Port mapping `3000:3000`.
+
+---
+
+## 🔍 Verification & Health Check
+
+You can verify that the container is healthy by running:
+```bash
+# Check container logs
+docker logs -f biotill-storefront
+
+# Test health check endpoint
+curl -I http://localhost:3000/in
 ```

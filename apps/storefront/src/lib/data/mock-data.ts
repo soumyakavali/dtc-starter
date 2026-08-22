@@ -37,12 +37,16 @@ export const MOCK_COLLECTIONS: HttpTypes.StoreCollection[] = [
   },
 ]
 
-export const MOCK_CATEGORIES: HttpTypes.StoreProductCategory[] = [
+export const MOCK_CATEGORIES: (HttpTypes.StoreProductCategory & {
+  category_children?: HttpTypes.StoreProductCategory[]
+  products?: HttpTypes.StoreProduct[]
+})[] = [
   {
-    id: "cat_powder",
-    name: "ಪೌಡರ್ ಜೈವಿಕ ಕೃಷಿ ಉತ್ಪನ್ನಗಳು (Powder Formulations)",
-    handle: "powder-products",
-    description: "ಉತ್ತಮ ಗುಣಮಟ್ಟದ ಜೈವಿಕ ಶಿಲೀಂಧ್ರನಾಶಕ, ಕೀಟನಾಶಕ ಮತ್ತು ಗೊಬ್ಬರ ಪೌಡರ್ ಪ್ಯಾಕ್‌ಗಳು - ₹150/- (1 ಕೆಜಿ)",
+    id: "cat_bio_fertilizers",
+    name: "Bio-Fertilizers & VAM (ಜೈವಿಕ ಗೊಬ್ಬರ & ವ್ಯಾಮ್)",
+    handle: "bio-fertilizers",
+    description:
+      "ರಂಜಕ, ಸಾರಜನಕ ಮತ್ತು ಪೊಟ್ಯಾಶ್ ಒದಗಿಸುವ ಜೈವಿಕ ರಂಜಕ ಗೊಬ್ಬರ ಹಾಗೂ ಲಿಕ್ವಿಡ್ ಎನ್.ಪಿ.ಕೆ ಕನ್ಸಾರ್ಸಿಯಂ - ಬೇರು ವೃದ್ಧಿ ಹಾಗೂ ಅಧಿಕ ಇಳುವರಿಗೆ.",
     is_active: true,
     is_internal: false,
     rank: 0,
@@ -53,13 +57,74 @@ export const MOCK_CATEGORIES: HttpTypes.StoreProductCategory[] = [
     updated_at: new Date().toISOString(),
   },
   {
-    id: "cat_liquid",
-    name: "ಲಿಕ್ವಿಡ್ ಜೈವಿಕ ಕೃಷಿ ಉತ್ಪನ್ನಗಳು (Liquid Formulations)",
-    handle: "liquid-products",
-    description: "ಹನಿ ನೀರಾವರಿ (ಡ್ರಿಪ್) ಹಾಗೂ ಸಿಂಪರಣೆಗೆ ಸಾಂದ್ರೀಕೃತ ಜೈವಿಕ ಲಿಕ್ವಿಡ್ - ₹350/- (1 ಲೀಟರ್)",
+    id: "cat_bio_pesticides",
+    name: "Bio-Pesticides & Insecticides (ಜೈವಿಕ ಕೀಟನಾಶಕಗಳು)",
+    handle: "bio-pesticides",
+    description:
+      "ಮಣ್ಣಿನ ಗೊಣ್ಣೆ ಹುಳು, ಗೆದ್ದಲು, ಬೇರು ಹುಳು ಹಾಗೂ ಕೀಟಗಳನ್ನು ನೈಸರ್ಗಿಕವಾಗಿ ನಿಯಂತ್ರಿಸುವ ಗ್ರೀನ್ ಮಸ್ಕಾರ್ಡಿನ್ ಜೈವಿಕ ಕೀಟನಾಶಕಗಳು.",
     is_active: true,
     is_internal: false,
     rank: 1,
+    parent_category: null,
+    parent_category_id: null,
+    category_children: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "cat_bio_fungicides",
+    name: "Bio-Fungicides & Bactericides (ಜೈವಿಕ ಶಿಲೀಂಧ್ರ & ಬ್ಯಾಕ್ಟೀರಿಯಾನಾಶಕ)",
+    handle: "bio-fungicides",
+    description:
+      "ಬೇರು ಕೊಳೆತ, ಕಾಂಡ ಕೊಳೆತ, ಸೊರಗು ರೋಗ (Wilt), ಎಲೆ ಚುಕ್ಕೆ ಮತ್ತು ದುಂಡಾಣು ರೋಗಗಳನ್ನು ತಡೆಯುವ ನೈಸರ್ಗಿಕ ಜೈವಿಕ ಸೂಕ್ಷ್ಮಾಣುಜೀವಿಗಳು.",
+    is_active: true,
+    is_internal: false,
+    rank: 2,
+    parent_category: null,
+    parent_category_id: null,
+    category_children: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "cat_bio_decomposers",
+    name: "Bio-Decomposers & Nematicides (ಡಿಕಂಪೋಸರ್ & ನೆಮಟೋಡ್ ನಿಯಂತ್ರಕ)",
+    handle: "bio-decomposers",
+    description:
+      "ಕೃಷಿ ತ್ಯಾಜ್ಯದಿಂದ 30 ದಿನಗಳಲ್ಲಿ ಉತ್ಕೃಷ್ಟ ಕಾಂಪೋಸ್ಟ್ ತಯಾರಿಸುವ ಡಿಕಂಪೋಸರ್ ಹಾಗೂ ಬೇರು ಗಂಟು ಜಂತುಹುಳು ನಾಶಕಗಳು.",
+    is_active: true,
+    is_internal: false,
+    rank: 3,
+    parent_category: null,
+    parent_category_id: null,
+    category_children: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "cat_powder",
+    name: "ಪೌಡರ್ ಜೈವಿಕ ಕೃಷಿ ಉತ್ಪನ್ನಗಳು (Powder Formulations @ ₹150)",
+    handle: "powder-products",
+    description:
+      "ಉತ್ತಮ ಗುಣಮಟ್ಟದ ಜೈವಿಕ ಶಿಲೀಂಧ್ರನಾಶಕ, ಕೀಟನಾಶಕ ಮತ್ತು ಗೊಬ್ಬರ ಪೌಡರ್ ಪ್ಯಾಕ್‌ಗಳು - ₹150/- (1 ಕೆಜಿ)",
+    is_active: true,
+    is_internal: false,
+    rank: 4,
+    parent_category: null,
+    parent_category_id: null,
+    category_children: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "cat_liquid",
+    name: "ಲಿಕ್ವಿಡ್ ಜೈವಿಕ ಕೃಷಿ ಉತ್ಪನ್ನಗಳು (Liquid Formulations @ ₹350)",
+    handle: "liquid-products",
+    description:
+      "ಹನಿ ನೀರಾವರಿ (ಡ್ರಿಪ್) ಹಾಗೂ ಸಿಂಪರಣೆಗೆ ಸಾಂದ್ರೀಕೃತ ಜೈವಿಕ ಲಿಕ್ವಿಡ್ - ₹350/- (1 ಲೀಟರ್)",
+    is_active: true,
+    is_internal: false,
+    rank: 5,
     parent_category: null,
     parent_category_id: null,
     category_children: [],
@@ -78,7 +143,7 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     subtitle: "ಜೈವಿಕ ಶಿಲೀಂಧ್ರನಾಶಕ • ಬೇರು ಕೊಳೆತ, ಕಾಂಡ ಕೊಳೆತ ಮತ್ತು ಸೊರಗು ರೋಗ ತಡೆಗಟ್ಟಲು • 1 ಕೆಜಿ",
     description:
       "ಟ್ರೈಕೋಡರ್ಮಾ (Trichoderma viride 2×10⁶ CFU/g) ನೈಸರ್ಗಿಕ ಜೈವಿಕ ಶಿಲೀಂಧ್ರನಾಶಕವಾಗಿದ್ದು, ಬೆಳೆಗಳಲ್ಲಿ ಬರುವ ಶಿಲೀಂಧ್ರ ರೋಗಗಳಾದ ಬೇರು ಕೊಳೆತ (Root Rot), ಕಾಂಡ ಕೊಳೆತ (Collar Rot), ಸೊರಗು ರೋಗ (Fusarium Wilt), ತೇವ ಸಸಿ ಕೊಳೆತ (Damping off) ಮತ್ತು ಕಪ್ಪುಕಲೆ ರೋಗಗಳನ್ನು ಪರಿಣಾಮಕಾರಿಯಾಗಿ ನಿಯಂತ್ರಿಸುತ್ತದೆ. ಇದು ಸಸ್ಯದ ಬೇರುಗಳ ಸುತ್ತ ರಕ್ಷಣಾತ್ಮಕ ಕವಚ ನಿರ್ಮಿಸಿ ರೋಗಾಣುಗಳನ್ನು ನಾಶಪಡಿಸುತ್ತದೆ.",
-    handle: "trichoderma-powder",
+    handle: "trichoderma-harzianum-powder",
     is_giftcard: false,
     status: "published",
     thumbnail:
@@ -144,7 +209,7 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     subtitle: "ಜೈವಿಕ ಬ್ಯಾಕ್ಟೀರಿಯಾನಾಶಕ • ಎಲೆ ಚುಕ್ಕೆ, ಕರಕಲು ಮತ್ತು ದುಂಡಾಣು ರೋಗ ನಿಯಂತ್ರಣಕ್ಕೆ • 1 ಕೆಜಿ",
     description:
       "ಸುಡೋಮೊನಾಸ್ ಫ್ಲೋರೊಸೆನ್ಸ್ (Pseudomonas fluorescens 1×10⁸ CFU/g) ಪ್ರಬಲ ಜೈವಿಕ ಬ್ಯಾಕ್ಟೀರಿಯಾನಾಶಕ ಮತ್ತು ಸಸ್ಯ ಬೆಳವಣಿಗೆ ಪ್ರವರ್ಧಕ (PGPR). ಇದು ಎಲೆ ಚುಕ್ಕೆ ರೋಗ, ದುಂಡಾಣು ಕರಕಲು (Bacterial Blight), ಎಲೆ ಒಣಗು ರೋಗ ಮತ್ತು ಶಿಲೀಂಧ್ರ ರೋಗಗಳಿಂದ ಗಿಡವನ್ನು ರಕ್ಷಿಸಿ ನೈಸರ್ಗಿಕ ರೋಗನಿರೋಧಕ ಶಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
-    handle: "pseudomonas-powder",
+    handle: "pseudomonas-fluorescens-powder",
     is_giftcard: false,
     status: "published",
     thumbnail:
@@ -205,8 +270,8 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     title: "ಮೆಟಾರೈಸಿಯಂ ಪೌಡರ್ (Metarhizium Anisopliae Bio-Insecticide)",
     subtitle: "ಜೈವಿಕ ಕೀಟನಾಶಕ • ಗೊಣ್ಣೆ ಹುಳು, ಗೆದ್ದಲು ಮತ್ತು ಬೇರು ಕೀಟಗಳ ನಾಶಕ್ಕೆ • 1 ಕೆಜಿ",
     description:
-      "ಮೆಟಾರೈಸಿಯಂ ಅನಿಸೊಪ್ಲಿಯೆ (Metarhizium anisopliae 1×10⁸ CFU/g) ಗ್ರೀನ್ ಮಸ್ಕಾರ್ಡಿನ್ ಜೈವಿಕ ಕೀಟನಾಶಕವಾಗಿದೆ. ಇದು ಮಣ್ಣಿನಲ್ಲಿ ಅಡಗಿರುವ ಅಪಾಯಕಾರಿ ಗೊಣ್ಣೆ ಹುಳುಗಳು (White Grubs), ಗೆದ್ದಲುಗಳು (Termites), ಕಂಬಳಿ ಹುಳು, ಬೇರು ಕೊರೆಯುವ ಹುಳು ಹಾಗೂ ದುಂಬಿಗಳನ್ನು ನೈಸರ್ಗಿಕವಾಗಿ ಸೋಂಕು ತಗುಲಿಸಿ ನಾಶಮಾಡುತ್ತದೆ.",
-    handle: "metarhizium-powder",
+      "ಮೆಟಾರೈಸಿಯಂ ಅನಿಸೊಪ್ಲಿಯೆ (Metarhizium anisopliae 2 x 10^8 CFU/g / 1×10⁸ CFU/g) ಗ್ರೀನ್ ಮಸ್ಕಾರ್ಡಿನ್ ಜೈವಿಕ ಕೀಟನಾಶಕವಾಗಿದೆ. ಇದು ಮಣ್ಣಿನಲ್ಲಿ ಅಡಗಿರುವ ಅಪಾಯಕಾರಿ ಗೊಣ್ಣೆ ಹುಳುಗಳು (White Grubs), ಗೆದ್ದಲುಗಳು (Termites), ಕಂಬಳಿ ಹುಳು, ಬೇರು ಕೊರೆಯುವ ಹುಳು ಹಾಗೂ ದುಂಬಿಗಳನ್ನು ನೈಸರ್ಗಿಕವಾಗಿ ಸೋಂಕು ತಗುಲಿಸಿ ನಾಶಮಾಡುತ್ತದೆ.",
+    handle: "metarhizium-anisopliae-powder",
     is_giftcard: false,
     status: "published",
     thumbnail:
@@ -268,7 +333,7 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     subtitle: "ಜೈವಿಕ ರಂಜಕ ಗೊಬ್ಬರ • ಬೇರಿನ ತ್ವರಿತ ವೃದ್ಧಿ, ರಂಜಕ ಹೀರಿಕೆ ಮತ್ತು ಬರ ನಿರೋಧಕತೆ • 1 ಕೆಜಿ",
     description:
       "ವ್ಯಾಮ್ (Vesicular Arbuscular Mycorrhiza - 100 IP/g) ಸಸ್ಯಗಳ ಬೇರುಗಳೊಂದಿಗೆ ಸಹಜೀವನ ನಡೆಸಿ ಬೇರಿನ ವ್ಯಾಪ್ತಿಯನ್ನು 300% ವರೆಗೆ ವಿಸ್ತರಿಸುತ್ತದೆ. ಮಣ್ಣಿನಲ್ಲಿ ಕರಗದ ರೂಪದಲ್ಲಿರುವ ರಂಜಕ (Phosphorus), ಸತು (Zinc), ಕಬ್ಬಿಣ ಮತ್ತು ನೀರಿನ ಹೀರಿಕೆಯನ್ನು ಅಗಾಧವಾಗಿ ಹೆಚ್ಚಿಸುತ್ತದೆ.",
-    handle: "vam-powder",
+    handle: "vam-bio-fertilizer-powder",
     is_giftcard: false,
     status: "published",
     thumbnail:
@@ -330,7 +395,7 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     subtitle: "ಜೈವಿಕ ನೆಮಟೋಡ್ ನಿಯಂತ್ರಕ • ಬೇರು ಗಂಟು ಜಂತುಹುಳು ನಾಶಕ್ಕೆ • 1 ಕೆಜಿ",
     description:
       "ಪೆಸಿಲೋಮೈಸಿಸ್ ಲಿಲಾಸಿನಸ್ (Paecilomyces lilacinus 1×10⁸ CFU/g) ಜೈವಿಕ ಜಂತುಹುಳು ನಾಶಕವಾಗಿದೆ. ಇದು ಮಣ್ಣಿನಲ್ಲಿರುವ ಬೇರು ಗಂಟು ಜಂತುಹುಳುಗಳು (Root-knot Nematodes), ಅವುಗಳ ಮೊಟ್ಟೆಗಳು ಹಾಗೂ ಲಾರ್ವಾಗಳನ್ನು ತಿಂದು ನಾಶಪಡಿಸಿ, ಬೇರುಗಳಲ್ಲಿ ಗಂಟುಗಳು ಉಂಟಾಗುವುದನ್ನು ತಡೆಯುತ್ತದೆ.",
-    handle: "paecilomyces-powder",
+    handle: "paecilomyces-lilacinus-powder",
     is_giftcard: false,
     status: "published",
     thumbnail:
@@ -392,7 +457,7 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     subtitle: "ಜೈವಿಕ ಡಿಕಂಪೋಸರ್ • ಕೃಷಿ ತ್ಯಾಜ್ಯ, ಸಗಣಿ, ಎಲೆಗಳನ್ನು 30-40 ದಿನಗಳಲ್ಲಿ ಫಲವತ್ತಾದ ಸಾವಯವ ಗೊಬ್ಬರವಾಗಿಸಲು • 1 ಕೆಜಿ",
     description:
       "ಕಾಂಪೊಸ್ಟ್ ಕಲ್ಚರ್ ಕೃಷಿ ತ್ಯಾಜ್ಯ, ಒಣ ಎಲೆ, ಕಬ್ಬಿನ ರವದಿ, ತೆಂಗು-ಅಡಿಕೆ ಸಿಪ್ಪೆ, ಸಗಣಿ ಮತ್ತು ಹೊಲದ ಕಸವನ್ನು ದುರ್ವಾಸನೆ ರಹಿತವಾಗಿ ತ್ವರಿತವಾಗಿ ಕಳಿಸಿ ಉತ್ಕೃಷ್ಟ ಸಾವಯವ ಕಾಂಪೋಸ್ಟ್ ಆಗಿ ಪರಿವರ್ತಿಸುವ ಪ್ರಯೋಜನಕಾರಿ ಬ್ಯಾಕ್ಟೀರಿಯಾ ಮತ್ತು ಎಂಜೈಮ್‌ಗಳ ಸಮೃದ್ಧ ಮಿಶ್ರಣವಾಗಿದೆ.",
-    handle: "compost-culture-powder",
+    handle: "dr-soil-organic-decomposer-culture",
     is_giftcard: false,
     status: "published",
     thumbnail:
@@ -642,7 +707,7 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     subtitle: "ಸಾರಜನಕ, ರಂಜಕ, ಪೊಟ್ಯಾಶ್ ಒದಗಿಸುವ ಜೈವಿಕ ದ್ರವ ಗೊಬ್ಬರ (N + P + K) • 1 ಲೀಟರ್",
     description:
       "ಬಯೋ ಎನ್ಪಿಕೆ ಕನ್ಸಾರ್ಸಿಯಂ (Bio NPK Liquid 1×10⁸ CFU/ml) ಸಾರಜನಕ ಸ್ಥಿರೀಕರಣ (Azotobacter), ರಂಜಕ ಕರಗಿಸುವ (PSB) ಮತ್ತು ಪೊಟ್ಯಾಷ್ ಒದಗಿಸುವ (KMB) ಬ್ಯಾಕ್ಟೀರಿಯಾಗಳ ಪ್ರಬಲ ಮಿಶ್ರಣ. ಇದು ರಾಸಾಯನಿಕ ಯೂರಿಯಾ ಮತ್ತು ಡಿಎಪಿ ಗೊಬ್ಬರದ ವೆಚ್ಚವನ್ನು 25-30% ರಷ್ಟು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ.",
-    handle: "bio-npk-consortium-liquid",
+    handle: "liquid-npk-consortium",
     is_giftcard: false,
     status: "published",
     thumbnail:
@@ -699,6 +764,47 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     updated_at: new Date().toISOString(),
   },
 ]
+
+// Assign categories and collections
+const categoryProductMap: Record<string, string[]> = {
+  cat_bio_fertilizers: ["prod_vam_powder", "prod_bio_npk_liquid"],
+  cat_bio_pesticides: ["prod_metarhizium_powder", "prod_metarhizium_liquid"],
+  cat_bio_fungicides: [
+    "prod_trichoderma_powder",
+    "prod_trichoderma_liquid",
+    "prod_pseudomonas_powder",
+    "prod_pseudomonas_liquid",
+  ],
+  cat_bio_decomposers: [
+    "prod_paecilomyces_powder",
+    "prod_compost_culture_powder",
+  ],
+  cat_powder: [
+    "prod_trichoderma_powder",
+    "prod_pseudomonas_powder",
+    "prod_metarhizium_powder",
+    "prod_vam_powder",
+    "prod_paecilomyces_powder",
+    "prod_compost_culture_powder",
+  ],
+  cat_liquid: [
+    "prod_trichoderma_liquid",
+    "prod_pseudomonas_liquid",
+    "prod_metarhizium_liquid",
+    "prod_bio_npk_liquid",
+  ],
+}
+
+MOCK_PRODUCTS.forEach((product) => {
+  product.categories = MOCK_CATEGORIES.filter((cat) =>
+    categoryProductMap[cat.id]?.includes(product.id)
+  )
+})
+
+MOCK_CATEGORIES.forEach((cat) => {
+  const prodIds = categoryProductMap[cat.id] || []
+  cat.products = MOCK_PRODUCTS.filter((p) => prodIds.includes(p.id))
+})
 
 // Assign products to collections
 MOCK_COLLECTIONS[0].products = MOCK_PRODUCTS.filter(

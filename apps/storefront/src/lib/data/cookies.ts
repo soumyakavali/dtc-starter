@@ -1,5 +1,6 @@
 import "server-only"
 import { cookies as nextCookies } from "next/headers"
+import { compressCartData, hydrateCartData } from "./cart-helpers"
 
 export const getAuthHeaders = async (): Promise<
   { authorization: string } | Record<string, never>
@@ -110,8 +111,8 @@ export const removePendingCustomer = async () => {
 }
 
 let memoryCartId: string | null = null
-let memoryLocalCart: any = null
-let memoryLastOrder: any = null
+let memoryLocalCart: HttpTypes.StoreCart | null = null
+let memoryLastOrder: HttpTypes.StoreOrder | null = null
 
 export const getCartId = async () => {
   if (memoryCartId) return memoryCartId
@@ -154,15 +155,16 @@ export const removeCartId = async () => {
   }
 }
 
-export const getLocalCartData = async (): Promise<any | null> => {
+export const getLocalCartData = async (): Promise<HttpTypes.StoreCart | null> => {
   if (memoryLocalCart) return memoryLocalCart
   try {
     const cookies = await nextCookies()
     const value = cookies.get("_medusa_cart_data")?.value
     if (value) {
       const parsed = JSON.parse(decodeURIComponent(value))
-      memoryLocalCart = parsed
-      return parsed
+      const hydrated = hydrateCartData(parsed)
+      memoryLocalCart = hydrated
+      return hydrated
     }
     return null
   } catch {
@@ -170,15 +172,17 @@ export const getLocalCartData = async (): Promise<any | null> => {
   }
 }
 
-export const setLocalCartData = async (data: any) => {
-  memoryLocalCart = data
+export const setLocalCartData = async (data: Partial<HttpTypes.StoreCart> & Record<string, unknown>) => {
+  const hydrated = hydrateCartData(data) || (data as unknown as HttpTypes.StoreCart)
+  memoryLocalCart = hydrated
   try {
     const cookies = await nextCookies()
-    const jsonStr = encodeURIComponent(JSON.stringify(data))
+    const compressed = compressCartData(data)
+    const jsonStr = encodeURIComponent(JSON.stringify(compressed))
     cookies.set("_medusa_cart_data", jsonStr, {
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
     })
@@ -200,7 +204,7 @@ export const removeLocalCartData = async () => {
   }
 }
 
-export const getLastOrderData = async (orderId?: string): Promise<any | null> => {
+export const getLastOrderData = async (orderId?: string): Promise<HttpTypes.StoreOrder | null> => {
   if (memoryLastOrder && (!orderId || memoryLastOrder.id === orderId)) {
     return memoryLastOrder
   }
@@ -220,8 +224,8 @@ export const getLastOrderData = async (orderId?: string): Promise<any | null> =>
   }
 }
 
-export const setLastOrderData = async (order: any) => {
-  memoryLastOrder = order
+export const setLastOrderData = async (order: HttpTypes.StoreOrder | (Record<string, unknown> & { id: string })) => {
+  memoryLastOrder = order as HttpTypes.StoreOrder
   try {
     const cookies = await nextCookies()
     const jsonStr = encodeURIComponent(JSON.stringify(order))

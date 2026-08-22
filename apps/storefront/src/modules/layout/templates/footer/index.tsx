@@ -24,7 +24,7 @@ export default function Footer() {
                   BioTill<span className="text-emerald-400">Biotech</span>
                 </span>
                 <span className="text-[9px] uppercase font-bold tracking-widest text-emerald-300">
-                  SWASH BIOTECH SOLUTIONS
+                  BIOTILL BIOTECH SOLUTIONS
                 </span>
               </div>
             </LocalizedClientLink>
@@ -33,7 +33,7 @@ export default function Footer() {
             </p>
             <div className="space-y-1.5 text-xs text-emerald-300">
               <p className="flex items-center gap-1.5">
-                <span>🏢</span> <strong>SWASH YAKSAZ BIOTECH SOLUTIONS / BIOTILL AGRI</strong>
+                <span>🏢</span> <strong>BIOTILL BIOTECH SOLUTIONS AGRI</strong>
               </p>
               <p className="flex items-center gap-1.5">
                 <span>📍</span> <strong>Agronomy Hub:</strong> Karnataka, India
@@ -64,95 +64,88 @@ export default function Footer() {
                   className="hover:text-amber-400 transition-colors flex items-center justify-between"
                   href="/collections/liquid-products"
                 >
-                  <span>🧪 Liquid Consortia (1 L)</span>
-                  <span className="text-amber-400 font-bold">₹350/-</span>
+                  <span>🛢️ Liquid Formulations (1 Litre)</span>
+                  <span className="text-emerald-300 font-bold">₹350/-</span>
                 </LocalizedClientLink>
               </li>
               <li>
                 <LocalizedClientLink
-                  className="hover:text-amber-400 transition-colors"
-                  href="/products/trichoderma-powder"
+                  className="hover:text-white transition-colors"
+                  href="/store"
                 >
-                  Trichoderma Bio-Fungicide
+                  🌱 Bio-Fertilizers & NPK Consortia
                 </LocalizedClientLink>
               </li>
               <li>
                 <LocalizedClientLink
-                  className="hover:text-amber-400 transition-colors"
-                  href="/products/bio-npk-consortium-liquid"
+                  className="hover:text-white transition-colors"
+                  href="/store"
                 >
-                  Bio NPK Liquid (N+P+K)
+                  🛡️ Bio-Pesticides & Bio-Fungicides
                 </LocalizedClientLink>
               </li>
               <li>
                 <LocalizedClientLink
-                  className="hover:text-amber-400 transition-colors"
+                  className="hover:text-white transition-colors"
                   href="/products/vam-powder"
                 >
-                  VAM Endo-Mycorrhiza Booster
+                  🌾 Mycorrhizal Bio-Stimulants (VAM)
                 </LocalizedClientLink>
               </li>
             </ul>
           </div>
 
-          {/* Quick Links & Services */}
+          {/* Farmer Advisory & Helpline */}
           <div className="md:col-span-2 space-y-3">
-            <h4 className="font-bold text-white text-sm uppercase tracking-wider">
-              Farmer Services
+            <h4 className="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-1.5">
+              <span>👨‍🌾</span> Farmer Support
             </h4>
             <ul className="space-y-2 text-xs text-emerald-200">
               <li>
-                <LocalizedClientLink
-                  className="hover:text-amber-400 transition-colors"
-                  href="/store"
-                >
-                  All 10 Bio-Products
+                <LocalizedClientLink className="hover:text-white transition-colors" href="/about">
+                  About Us
                 </LocalizedClientLink>
               </li>
               <li>
-                <a
-                  className="hover:text-amber-400 transition-colors"
-                  href="#dosage-calculator"
-                >
-                  Dosage Calculator
-                </a>
+                <LocalizedClientLink className="hover:text-white transition-colors" href="/contact">
+                  Contact Us & Helpline
+                </LocalizedClientLink>
               </li>
               <li>
-                <a
-                  className="hover:text-amber-400 transition-colors"
-                  href="#about-us"
-                >
-                  About Biotech Science
-                </a>
+                <LocalizedClientLink className="hover:text-white transition-colors" href="/store">
+                  All Bio-Products
+                </LocalizedClientLink>
               </li>
               <li>
-                <LocalizedClientLink
-                  className="hover:text-amber-400 transition-colors"
-                  href="/account"
-                >
+                <LocalizedClientLink className="hover:text-white transition-colors" href="/account">
                   Farmer Account
                 </LocalizedClientLink>
               </li>
               <li>
-                <LocalizedClientLink
-                  className="hover:text-amber-400 transition-colors"
-                  href="/cart"
-                >
-                  Cart & Checkout
+                <LocalizedClientLink className="text-emerald-300 hover:text-white font-bold transition-colors flex items-center gap-1" href="/tests">
+                  <span>🧪 Run Live E2E Tests</span>
                 </LocalizedClientLink>
+              </li>
+              <li>
+                <a
+                  className="hover:text-amber-400 transition-colors font-bold text-amber-300 flex items-center gap-1"
+                  href="tel:+919480123456"
+                >
+                  <span>📞 Toll-Free Helpline</span>
+                </a>
               </li>
             </ul>
           </div>
 
-          {/* Safe Payments & Assurances */}
+          {/* Trust Badges & Direct Payment Support */}
           <div className="md:col-span-3 space-y-3">
-            <h4 className="font-bold text-white text-sm uppercase tracking-wider">
-              100% Safe Payments
+            <h4 className="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-1.5">
+              <span>🔒</span> 100% Safe Payments
             </h4>
-            <p className="text-xs text-emerald-200/90">
-              Zero transaction fees across all Indian digital payment methods and Cash on Delivery:
+            <p className="text-xs text-emerald-300">
+              Direct UPI payment via PhonePe, Paytm, Google Pay, NetBanking & Cash on Delivery.
             </p>
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-2 pt-2">
               <div className="p-1.5 bg-white rounded-md shadow-xs">
                 <PhonePeIcon size={24} />
               </div>
@@ -173,7 +166,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 text-xs text-emerald-300">
-          <p>© {new Date().getFullYear()} BioTill & Swash Biotech Solutions. All rights reserved.</p>
+          <p suppressHydrationWarning>© {new Date().getFullYear()} BioTill Biotech Solutions. All rights reserved.</p>
           <div className="flex items-center gap-4 text-emerald-400">
             <span>100% Certified Bio-Organic</span>
             <span>•</span>

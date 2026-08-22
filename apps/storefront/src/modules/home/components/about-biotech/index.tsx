@@ -10,7 +10,7 @@ export default function AboutBiotech() {
           <div className="lg:col-span-7 space-y-5">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-black rounded-full uppercase tracking-wider">
               <span>🌱</span>
-              <span>About BioTill & Swash Biotech Solutions</span>
+              <span>About BioTill Biotech Solutions</span>
             </div>
 
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">

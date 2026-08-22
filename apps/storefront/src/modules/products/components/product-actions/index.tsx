@@ -72,7 +72,7 @@ export default function ProductActions({
     }))
   }
 
-  // check if the selected options produce a valid variant
+  //check if the selected options produce a valid variant
   const isValidVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) return false
     if (product.variants.length === 1) return true
@@ -108,19 +108,15 @@ export default function ProductActions({
     }
 
     // If we allow back orders on the variant, we can add to cart
-    if (selectedVariant?.allow_backorder) {
+    if (selectedVariant.allow_backorder) {
       return true
     }
 
     // If there is inventory available, we can add to cart
-    if (
-      selectedVariant?.manage_inventory &&
-      (selectedVariant?.inventory_quantity || 0) > 0
-    ) {
+    if ((selectedVariant.inventory_quantity || 0) > 0) {
       return true
     }
 
-    // Otherwise, we can't add to cart
     return true
   }, [selectedVariant])
 
@@ -141,11 +137,30 @@ export default function ProductActions({
     setAddedSuccess(false)
 
     try {
-      await addToCart({
-        variantId: targetVariantId,
-        quantity: 1,
-        countryCode: countryCode || "in",
-      })
+      try {
+        await addToCart({
+          variantId: targetVariantId,
+          quantity: 1,
+          countryCode: countryCode || "in",
+        })
+      } catch (actionErr) {
+        console.warn("Direct server action failed, falling back to /api/cart:", actionErr)
+        const apiRes = await fetch("/api/cart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "add",
+            variantId: targetVariantId,
+            quantity: 1,
+            countryCode: countryCode || "in",
+          }),
+        })
+        const data = await apiRes.json()
+        if (!data.success) {
+          throw new Error(data.error || "Failed to add item to cart")
+        }
+      }
+
       setAddedSuccess(true)
       router.refresh()
       setTimeout(() => setAddedSuccess(false), 5000)
@@ -154,7 +169,7 @@ export default function ProductActions({
       const message =
         err instanceof Error
           ? err.message
-          : "Could not add product to cart."
+          : "Could not add product to cart. Please try again."
       setCartError(message)
     } finally {
       setIsAdding(false)

@@ -153,6 +153,7 @@ export default function DosageCalculator() {
                     key={key}
                     type="button"
                     onClick={() => setSelectedCropKey(key)}
+                    suppressHydrationWarning
                     className={`flex items-center gap-2 p-3 rounded-xl text-left text-xs font-bold transition-all ${
                       selectedCropKey === key
                         ? "bg-emerald-700 text-white shadow-md scale-[1.02]"
@@ -182,6 +183,7 @@ export default function DosageCalculator() {
                 step={1}
                 value={acreage}
                 onChange={(e) => setAcreage(Number(e.target.value))}
+                suppressHydrationWarning
                 className="w-full h-2.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
               />
               <div className="flex justify-between text-[11px] font-semibold text-gray-400 mt-1">

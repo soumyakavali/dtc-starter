@@ -21,7 +21,7 @@ const Hero = () => {
 
       <div className="content-container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left Column: Swash Biotech Style Headline & Showcase */}
+          {/* Left Column: BioTill Biotech Headline & Showcase */}
           <div className="lg:col-span-7 flex flex-col items-start text-left space-y-5">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-800/90 border border-emerald-600/70 text-emerald-200 text-xs font-bold shadow-inner">
               <span className="text-emerald-400 text-sm">🌿</span>

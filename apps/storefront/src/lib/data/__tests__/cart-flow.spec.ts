@@ -5,36 +5,50 @@ import {
   deleteLineItem,
   applyPromotions,
   getOrSetCart,
-} from "../cart"
-import { MOCK_PRODUCTS } from "../mock-data"
+} from "@lib/data/cart"
+import { getProductByHandle } from "@lib/data/products"
+import { listCategories } from "@lib/data/categories"
+import { HttpTypes } from "@medusajs/types"
 
-/**
- * BioTill Live E2E & User Flow Test Suite
- * Tests full Add to Cart, Pricing, Indian Farmer Discounts, Shipping Thresholds, and Checkout.
- */
-export async function runCartUITestSuite() {
-  const results: { test: string; status: "PASSED" | "FAILED"; details: string }[] = []
+export type TestResult = {
+  test: string
+  status: "PASSED" | "FAILED"
+  details: string
+}
 
-  const assert = (name: string, condition: boolean, message: string) => {
-    if (condition) {
-      results.push({ test: name, status: "PASSED", details: message })
-    } else {
-      results.push({ test: name, status: "FAILED", details: `Assertion failed: ${message}` })
-      console.error(`[TEST FAILED] ${name}: ${message}`)
-    }
+export async function runCartUITestSuite(): Promise<TestResult[]> {
+  const results: TestResult[] = []
+
+  const assert = (test: string, condition: boolean, details: string) => {
+    results.push({
+      test,
+      status: condition ? "PASSED" : "FAILED",
+      details,
+    })
   }
 
   try {
-    // Test 1: Initialize Cart for India Region
-    const cart = await getOrSetCart("in")
-    assert("1. Cart Initialization", !!cart && !!cart.id, `Created/retrieved cart with ID: ${cart?.id}`)
+    // Test 1: Category Listing & Agricultural Taxonomy
+    const categories = await listCategories()
+    assert(
+      "1. Agricultural Taxonomy & Category Retrieval",
+      categories.length >= 6,
+      `Loaded ${categories.length} categories (Bio-Fertilizers, Bio-Pesticides, Bio-Fungicides, etc.)`
+    )
 
-    // Test 2: Locate Products
-    const trichodermaLiquid = MOCK_PRODUCTS.find((p) => p.handle === "trichoderma-liquid")
-    const pseudomonasLiquid = MOCK_PRODUCTS.find((p) => p.handle === "pseudomonas-liquid")
-    assert("2. Locate Agricultural Products", !!trichodermaLiquid && !!pseudomonasLiquid, `Found Trichoderma & Pseudomonas in catalog`)
+    // Test 2: Product Catalog & Pricing (₹150 Powder / ₹350 Liquid)
+    const { product: trichodermaLiquid } = await getProductByHandle("trichoderma-liquid")
+    const { product: pseudomonasLiquid } = await getProductByHandle("pseudomonas-liquid")
+    assert(
+      "2. Product Catalog & Liquid Pricing (₹350)",
+      !!trichodermaLiquid &&
+        !!pseudomonasLiquid &&
+        trichodermaLiquid.variants?.[0]?.calculated_price?.calculated_amount === 350,
+      `Trichoderma Liquid price: ₹${trichodermaLiquid?.variants?.[0]?.calculated_price?.calculated_amount}`
+    )
 
-    // Test 3: Add Trichoderma Harzianum Liquid (@ ₹350)
+    // Test 3: Initialize Cart & Add Item (Trichoderma Liquid 1L @ ₹350)
+    await getOrSetCart("in")
     const triVariantId = trichodermaLiquid?.variants?.[0]?.id || "var_tri_liq_1l"
     await addToCart({
       variantId: triVariantId,
@@ -44,7 +58,8 @@ export async function runCartUITestSuite() {
 
     const cartAfter1 = await retrieveCart()
     const item1 = cartAfter1?.items?.find(
-      (i: any) => i.product_handle === "trichoderma-liquid" || i.variant_id === triVariantId
+      (i: HttpTypes.StoreCartLineItem) =>
+        (i as Record<string, unknown>).product_handle === "trichoderma-liquid" || i.variant_id === triVariantId
     )
     assert(
       "3. Add to Cart - Trichoderma Liquid (₹350)",
@@ -87,7 +102,7 @@ export async function runCartUITestSuite() {
     if (item1?.id) {
       await updateLineItem({ lineId: item1.id, quantity: 3 })
       const cartAfterUpdate = await retrieveCart()
-      const updatedItem = cartAfterUpdate?.items?.find((i: any) => i.id === item1.id)
+      const updatedItem = cartAfterUpdate?.items?.find((i: HttpTypes.StoreCartLineItem) => i.id === item1.id)
       assert(
         "7. Update Line Item Quantity to 3",
         updatedItem?.quantity === 3,
@@ -99,16 +114,16 @@ export async function runCartUITestSuite() {
     if (item1?.id) {
       await deleteLineItem(item1.id)
       const cartAfterDelete = await retrieveCart()
-      const deletedCheck = cartAfterDelete?.items?.find((i: any) => i.id === item1.id)
+      const deletedCheck = cartAfterDelete?.items?.find((i: HttpTypes.StoreCartLineItem) => i.id === item1.id)
       assert(
         "8. Remove Line Item from Cart",
         !deletedCheck,
         `Item removed cleanly, remaining line items in cart: ${cartAfterDelete?.items?.length}`
       )
     }
-
-  } catch (err: any) {
-    results.push({ test: "Fatal Exception in Test Flow", status: "FAILED", details: err.message || String(err) })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    results.push({ test: "Fatal Exception in Test Flow", status: "FAILED", details: msg })
   }
 
   return results

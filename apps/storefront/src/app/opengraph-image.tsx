@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og"
 
-export const runtime = "edge"
-export const alt = "KrishiVeda Direct - Agricultural Marketplace"
+export const alt = "BioTill Biotech Solutions - Direct Agricultural Formulations"
 export const size = {
   width: 1200,
   height: 630,
@@ -36,7 +35,7 @@ export default async function Image() {
             lineHeight: 1.1,
           }}
         >
-          KrishiVeda Direct
+          BioTill Biotech Solutions
         </h1>
         <p
           style={{
@@ -47,7 +46,7 @@ export default async function Image() {
             fontWeight: 500,
           }}
         >
-          Direct-to-Farmer Agricultural eCommerce & Supply Marketplace
+          Direct-to-Farmer Agricultural Biotechnology Solutions
         </p>
         <div
           style={{
@@ -58,11 +57,11 @@ export default async function Image() {
             color: "#a7f3d0",
           }}
         >
-          <span>🌱 Certified Hybrid Seeds</span>
+          <span>📦 Powder Formulations (@ ₹150)</span>
           <span>•</span>
-          <span>🧪 Bio-Fertilizers</span>
+          <span>🛢️ Liquid Formulations (@ ₹350)</span>
           <span>•</span>
-          <span>🚜 Farm Equipment</span>
+          <span>🌿 100% Bio-Certified</span>
         </div>
       </div>
     ),

@@ -1,3 +1,4 @@
+const path = require("path")
 const checkEnvVariables = require("./check-env-variables")
 
 checkEnvVariables()
@@ -13,6 +14,7 @@ const S3_PATHNAME = process.env.MEDUSA_CLOUD_S3_PATHNAME
  */
 const nextConfig = {
   output: "standalone",
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   reactStrictMode: true,
   logging: {
     fetches: {
@@ -24,6 +26,18 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        "*.run.app",
+        "localhost:3000",
+        "localhost:8000",
+        "localhost:9000",
+        "*.googleusercontent.com",
+        "*.cloudshell.dev",
+      ],
+    },
   },
   images: {
     unoptimized: true,

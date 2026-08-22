@@ -1,12 +1,9 @@
 "use server"
 
-import { sdk } from "@lib/config"
 import { OptionValueIds } from "@lib/util/product-option-filters"
 import { sortProducts } from "@lib/util/sort-products"
 import { HttpTypes } from "@medusajs/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-import { getAuthHeaders, getCacheOptions } from "./cookies"
-import { getRegion, retrieveRegion } from "./regions"
 import { MOCK_PRODUCTS } from "./mock-data"
 
 type ProductListQueryParams = (HttpTypes.FindParams &
@@ -20,7 +17,22 @@ const getFilteredMockProducts = (queryParams?: ProductListQueryParams) => {
   if (!queryParams) return list
 
   if (queryParams.handle) {
-    list = list.filter((p) => p.handle === queryParams.handle)
+    const targetHandle = queryParams.handle.toLowerCase()
+    list = list.filter((p) => {
+      const ph = p.handle.toLowerCase()
+      return (
+        ph === targetHandle ||
+        targetHandle.includes(ph) ||
+        ph.includes(targetHandle) ||
+        (targetHandle.includes("trichoderma") && ph.includes("trichoderma") && (targetHandle.includes("pow") ? ph.includes("pow") : ph.includes("liq"))) ||
+        (targetHandle.includes("pseudomonas") && ph.includes("pseudomonas") && (targetHandle.includes("pow") ? ph.includes("pow") : ph.includes("liq"))) ||
+        (targetHandle.includes("metarhizium") && ph.includes("metarhizium") && (targetHandle.includes("pow") ? ph.includes("pow") : ph.includes("liq"))) ||
+        (targetHandle.includes("vam") && ph.includes("vam")) ||
+        (targetHandle.includes("paecilomyces") && ph.includes("paecilomyces")) ||
+        ((targetHandle.includes("soil") || targetHandle.includes("decomposer") || targetHandle.includes("compost")) && (ph.includes("soil") || ph.includes("decomposer") || ph.includes("compost"))) ||
+        (targetHandle.includes("npk") && ph.includes("npk"))
+      )
+    })
   }
   if (queryParams.id) {
     const ids = Array.isArray(queryParams.id) ? queryParams.id : [queryParams.id]
@@ -36,7 +48,11 @@ const getFilteredMockProducts = (queryParams?: ProductListQueryParams) => {
     const catIds = Array.isArray(queryParams.category_id)
       ? queryParams.category_id
       : [queryParams.category_id]
-    list = list.filter((p) => p.categories?.some((c) => catIds.includes(c.id)))
+    list = list.filter((p) =>
+      p.categories?.some(
+        (c) => catIds.includes(c.id) || (c.handle && catIds.includes(c.handle))
+      )
+    )
   }
   return list
 }
@@ -44,8 +60,8 @@ const getFilteredMockProducts = (queryParams?: ProductListQueryParams) => {
 export const listProducts = async ({
   pageParam = 1,
   queryParams,
-  countryCode,
-  regionId,
+  countryCode: _countryCode,
+  regionId: _regionId,
 }: {
   pageParam?: number
   queryParams?: ProductListQueryParams
@@ -59,14 +75,6 @@ export const listProducts = async ({
   const limit = queryParams?.limit || 12
   const _pageParam = Math.max(pageParam, 1)
   const offset = _pageParam === 1 ? 0 : (_pageParam - 1) * limit
-
-  let region: HttpTypes.StoreRegion | undefined | null
-
-  if (countryCode) {
-    region = await getRegion(countryCode)
-  } else if (regionId) {
-    region = await retrieveRegion(regionId)
-  }
 
   const fallbackResult = () => {
     const filtered = getFilteredMockProducts(queryParams)
@@ -82,53 +90,35 @@ export const listProducts = async ({
     }
   }
 
-  try {
-    const headers = {
-      ...(await getAuthHeaders()),
-    }
+  return fallbackResult()
+}
 
-    const next = {
-      ...(await getCacheOptions("products")),
-    }
-
-    return await sdk.client
-      .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
-        `/store/products`,
-        {
-          method: "GET",
-          query: {
-            limit,
-            offset,
-            region_id: region?.id,
-            fields:
-              "*variants.calculated_price,+variants.inventory_quantity,*variants.images,*variants.options,+metadata,+tags,",
-            ...queryParams,
-          },
-          headers,
-          next,
-          cache: "force-cache",
-        }
+export const getProductByHandle = async (
+  handle: string,
+  _regionId?: string
+): Promise<{ product: HttpTypes.StoreProduct | null }> => {
+  const norm = handle.toLowerCase().replace(/_/g, "-")
+  const matched =
+    MOCK_PRODUCTS.find((p) => {
+      const ph = p.handle.toLowerCase()
+      return (
+        ph === norm ||
+        norm.includes(ph) ||
+        ph.includes(norm) ||
+        (norm.includes("trichoderma") && norm.includes("pow") && ph.includes("trichoderma") && ph.includes("pow")) ||
+        (norm.includes("trichoderma") && norm.includes("liq") && ph.includes("trichoderma") && ph.includes("liq")) ||
+        (norm.includes("pseudomonas") && norm.includes("pow") && ph.includes("pseudomonas") && ph.includes("pow")) ||
+        (norm.includes("pseudomonas") && norm.includes("liq") && ph.includes("pseudomonas") && ph.includes("liq")) ||
+        (norm.includes("metarhizium") && norm.includes("pow") && ph.includes("metarhizium") && ph.includes("pow")) ||
+        (norm.includes("metarhizium") && norm.includes("liq") && ph.includes("metarhizium") && ph.includes("liq")) ||
+        (norm.includes("vam") && ph.includes("vam")) ||
+        (norm.includes("paecilomyces") && ph.includes("paecilomyces")) ||
+        ((norm.includes("soil") || norm.includes("decomposer") || norm.includes("compost")) && (ph.includes("soil") || ph.includes("decomposer") || ph.includes("compost"))) ||
+        (norm.includes("npk") && ph.includes("npk"))
       )
-      .then(({ products, count }) => {
-        if (products && products.length > 0) {
-          const nextPage = count > offset + limit ? pageParam + 1 : null
-          return {
-            response: {
-              products,
-              count,
-            },
-            nextPage: nextPage,
-            queryParams,
-          }
-        }
-        return fallbackResult()
-      })
-      .catch(() => {
-        return fallbackResult()
-      })
-  } catch {
-    return fallbackResult()
-  }
+    }) || null
+
+  return { product: matched }
 }
 
 /**

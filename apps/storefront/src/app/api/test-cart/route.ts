@@ -14,11 +14,12 @@ export async function GET() {
       failedCount: results.filter((r) => r.status === "FAILED").length,
       results,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Failed to execute cart test suite"
     return NextResponse.json(
       {
         status: "ERROR",
-        message: error.message || "Failed to execute cart test suite",
+        message: msg,
       },
       { status: 500 }
     )

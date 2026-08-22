@@ -10,7 +10,6 @@ import {
   getCacheTag,
   getCartId,
   getLocalCartData,
-  getLastOrderData,
   removeCartId,
   removeLocalCartData,
   setCartId,
@@ -19,85 +18,16 @@ import {
 } from "./cookies"
 import { getRegion } from "./regions"
 import { getLocale } from "./locale-actions"
-import { DEFAULT_MOCK_REGION, MOCK_PRODUCTS } from "./mock-data"
+import { DEFAULT_MOCK_REGION } from "./mock-data"
+import { calculateCartTotals, findProductAndVariant } from "./cart-helpers"
 
-function findProductAndVariant(variantId: string) {
-  for (const prod of MOCK_PRODUCTS) {
-    const variant = prod.variants?.find((v) => v.id === variantId)
-    if (variant) {
-      return { product: prod, variant }
+function safeRevalidate(tag: string) {
+  try {
+    if (tag && tag.trim().length > 0) {
+      revalidateTag(tag)
     }
-  }
-  for (const prod of MOCK_PRODUCTS) {
-    if (prod.id === variantId || prod.handle === variantId) {
-      return { product: prod, variant: prod.variants?.[0] }
-    }
-  }
-  return {
-    product: MOCK_PRODUCTS[0],
-    variant: MOCK_PRODUCTS[0].variants?.[0],
-  }
-}
-
-function calculateCartTotals(cart: any, region?: HttpTypes.StoreRegion) {
-  const items = (cart.items || []).map((item: any) => {
-    const unitPrice = Number(
-      item.unit_price ??
-        item.variant?.calculated_price?.calculated_amount ??
-        (item.product_handle?.includes("liquid") ? 350 : 150)
-    )
-    const quantity = Number(item.quantity ?? 1)
-    const total = unitPrice * quantity
-    return {
-      ...item,
-      unit_price: unitPrice,
-      quantity,
-      total,
-      subtotal: total,
-    }
-  })
-
-  const subtotal = items.reduce((acc: number, item: any) => acc + (item.total || 0), 0)
-
-  let discount_total = 0
-  const promoCodes = cart.promotions || cart.promo_codes || []
-  if (promoCodes.some((c: string) => c.toUpperCase() === "FARMER10")) {
-    discount_total = Math.round(subtotal * 0.1)
-  } else if (promoCodes.some((c: string) => c.toUpperCase() === "BIOTILL50")) {
-    discount_total = Math.min(50, subtotal)
-  } else if (promoCodes.length > 0) {
-    discount_total = Math.round(subtotal * 0.05)
-  }
-
-  const isFreeDelivery = subtotal >= 999
-  const shipping_total = items.length === 0 ? 0 : isFreeDelivery ? 0 : 70
-  const total = Math.max(0, subtotal - discount_total + shipping_total)
-
-  const activeRegion = region || cart.region || DEFAULT_MOCK_REGION
-
-  return {
-    ...cart,
-    currency_code: activeRegion.currency_code || "inr",
-    region_id: activeRegion.id,
-    region: activeRegion,
-    items,
-    subtotal,
-    discount_total,
-    shipping_total,
-    tax_total: 0,
-    total,
-    shipping_methods:
-      items.length > 0
-        ? [
-            {
-              id: isFreeDelivery ? "sm_free_agri" : "sm_standard_agri",
-              name: isFreeDelivery
-                ? "Free Agricultural Farm Delivery (Orders ₹999+ / ಉಚಿತ ಡೆಲಿವರಿ)"
-                : "Standard Rural & India Express (₹70 Flat)",
-              amount: shipping_total,
-            },
-          ]
-        : [],
+  } catch {
+    // ignore
   }
 }
 
@@ -222,10 +152,10 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
         .update(cartId, data, {}, headers)
         .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
           const cartCacheTag = await getCacheTag("carts")
-          if (cartCacheTag) revalidateTag(cartCacheTag)
+          safeRevalidate(cartCacheTag)
 
           const fulfillmentCacheTag = await getCacheTag("fulfillment")
-          if (fulfillmentCacheTag) revalidateTag(fulfillmentCacheTag)
+          safeRevalidate(fulfillmentCacheTag)
 
           return cart
         })
@@ -244,7 +174,7 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
   await setLocalCartData(recalculated)
 
   const cartCacheTag = await getCacheTag("carts")
-  if (cartCacheTag) revalidateTag(cartCacheTag)
+  safeRevalidate(cartCacheTag)
 
   return recalculated as unknown as HttpTypes.StoreCart
 }
@@ -289,10 +219,10 @@ export async function addToCart({
         )
         .then(async () => {
           const cartCacheTag = await getCacheTag("carts")
-          if (cartCacheTag) revalidateTag(cartCacheTag)
+          safeRevalidate(cartCacheTag)
 
           const fulfillmentCacheTag = await getCacheTag("fulfillment")
-          if (fulfillmentCacheTag) revalidateTag(fulfillmentCacheTag)
+          safeRevalidate(fulfillmentCacheTag)
         })
 
       return
@@ -302,7 +232,7 @@ export async function addToCart({
   }
 
   // Local / Standalone Cart Operation
-  let localCart = (await getLocalCartData()) || cart || { id: cart.id || `cart_local_${Date.now()}` }
+  const localCart = (await getLocalCartData()) || cart || { id: cart.id || `cart_local_${Date.now()}` }
   const { product, variant } = findProductAndVariant(variantId)
 
   const unitPrice =
@@ -311,10 +241,10 @@ export async function addToCart({
 
   const existingItems = Array.isArray(localCart.items) ? [...localCart.items] : []
   const existingIdx = existingItems.findIndex(
-    (item: any) =>
+    (item: HttpTypes.StoreCartLineItem) =>
       item.variant_id === variantId ||
       item.variant?.id === variantId ||
-      item.product_handle === product.handle
+      (item as Record<string, unknown>).product_handle === product.handle
   )
 
   if (existingIdx > -1) {
@@ -337,7 +267,7 @@ export async function addToCart({
       unit_price: unitPrice,
       total: (quantity || 1) * unitPrice,
       subtotal: (quantity || 1) * unitPrice,
-      variant_id: variant?.id || variantId,
+      variant_id: variantId || variant?.id,
       product_id: product.id,
       product_handle: product.handle,
       variant: variant || {
@@ -374,10 +304,10 @@ export async function addToCart({
   await setLocalCartData(updatedCart)
 
   const cartCacheTag = await getCacheTag("carts")
-  if (cartCacheTag) revalidateTag(cartCacheTag)
+  safeRevalidate(cartCacheTag)
 
   const fulfillmentCacheTag = await getCacheTag("fulfillment")
-  if (fulfillmentCacheTag) revalidateTag(fulfillmentCacheTag)
+  safeRevalidate(fulfillmentCacheTag)
 }
 
 export async function updateLineItem({
@@ -407,10 +337,10 @@ export async function updateLineItem({
         .updateLineItem(cartId, lineId, { quantity }, {}, headers)
         .then(async () => {
           const cartCacheTag = await getCacheTag("carts")
-          if (cartCacheTag) revalidateTag(cartCacheTag)
+          safeRevalidate(cartCacheTag)
 
           const fulfillmentCacheTag = await getCacheTag("fulfillment")
-          if (fulfillmentCacheTag) revalidateTag(fulfillmentCacheTag)
+          safeRevalidate(fulfillmentCacheTag)
         })
     } catch {
       // fallback
@@ -421,9 +351,9 @@ export async function updateLineItem({
   if (localCart && Array.isArray(localCart.items)) {
     let items = [...localCart.items]
     if (quantity <= 0) {
-      items = items.filter((item: any) => item.id !== lineId)
+      items = items.filter((item: HttpTypes.StoreCartLineItem) => item.id !== lineId)
     } else {
-      items = items.map((item: any) => {
+      items = items.map((item: HttpTypes.StoreCartLineItem) => {
         if (item.id === lineId) {
           const unitPrice = item.unit_price || 150
           return {
@@ -446,10 +376,10 @@ export async function updateLineItem({
     await setLocalCartData(recalculated)
 
     const cartCacheTag = await getCacheTag("carts")
-    if (cartCacheTag) revalidateTag(cartCacheTag)
+    safeRevalidate(cartCacheTag)
 
     const fulfillmentCacheTag = await getCacheTag("fulfillment")
-    if (fulfillmentCacheTag) revalidateTag(fulfillmentCacheTag)
+    safeRevalidate(fulfillmentCacheTag)
   }
 }
 
@@ -474,10 +404,10 @@ export async function deleteLineItem(lineId: string) {
         .deleteLineItem(cartId, lineId, {}, headers)
         .then(async () => {
           const cartCacheTag = await getCacheTag("carts")
-          if (cartCacheTag) revalidateTag(cartCacheTag)
+          safeRevalidate(cartCacheTag)
 
           const fulfillmentCacheTag = await getCacheTag("fulfillment")
-          if (fulfillmentCacheTag) revalidateTag(fulfillmentCacheTag)
+          safeRevalidate(fulfillmentCacheTag)
         })
     } catch {
       // fallback
@@ -486,7 +416,7 @@ export async function deleteLineItem(lineId: string) {
 
   const localCart = await getLocalCartData()
   if (localCart && Array.isArray(localCart.items)) {
-    const items = localCart.items.filter((item: any) => item.id !== lineId)
+    const items = localCart.items.filter((item: HttpTypes.StoreCartLineItem) => item.id !== lineId)
     const recalculated = calculateCartTotals({
       ...localCart,
       items,
@@ -496,10 +426,10 @@ export async function deleteLineItem(lineId: string) {
     await setLocalCartData(recalculated)
 
     const cartCacheTag = await getCacheTag("carts")
-    if (cartCacheTag) revalidateTag(cartCacheTag)
+    safeRevalidate(cartCacheTag)
 
     const fulfillmentCacheTag = await getCacheTag("fulfillment")
-    if (fulfillmentCacheTag) revalidateTag(fulfillmentCacheTag)
+    safeRevalidate(fulfillmentCacheTag)
   }
 }
 
@@ -520,7 +450,7 @@ export async function setShippingMethod({
         .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
         .then(async () => {
           const cartCacheTag = await getCacheTag("carts")
-          if (cartCacheTag) revalidateTag(cartCacheTag)
+          safeRevalidate(cartCacheTag)
         })
     } catch {
       // fallback
@@ -536,15 +466,37 @@ export async function setShippingMethod({
     })
     await setLocalCartData(recalculated)
     const cartCacheTag = await getCacheTag("carts")
-    if (cartCacheTag) revalidateTag(cartCacheTag)
+    safeRevalidate(cartCacheTag)
   }
 }
 
 export async function initiatePaymentSession(
-  cart: HttpTypes.StoreCart,
-  data: HttpTypes.StoreInitializePaymentSession
+  cartOrData?: HttpTypes.StoreCart | string | Record<string, unknown>,
+  dataOrOptions?: HttpTypes.StoreInitializePaymentSession | string | Record<string, unknown>
 ) {
-  if (cart.id && !cart.id.startsWith("cart_local_")) {
+  let cart: HttpTypes.StoreCart | null = null
+  let data: HttpTypes.StoreInitializePaymentSession = { provider_id: "pp_system_default" }
+
+  if (cartOrData && typeof cartOrData === "object" && "items" in cartOrData) {
+    cart = cartOrData as HttpTypes.StoreCart
+    if (dataOrOptions) {
+      data = typeof dataOrOptions === "string" ? { provider_id: dataOrOptions } : (dataOrOptions as HttpTypes.StoreInitializePaymentSession)
+    }
+  } else if (typeof cartOrData === "string") {
+    data = { provider_id: cartOrData }
+    cart = (await getLocalCartData()) || (await retrieveCart())
+  } else if (cartOrData && typeof cartOrData === "object" && ("provider_id" in cartOrData || "data" in cartOrData)) {
+    data = cartOrData as HttpTypes.StoreInitializePaymentSession
+    cart = (await getLocalCartData()) || (await retrieveCart())
+  } else {
+    cart = (await getLocalCartData()) || (await retrieveCart())
+  }
+
+  if (!cart) {
+    cart = await getOrSetCart("in")
+  }
+
+  if (cart?.id && !cart.id.startsWith("cart_local_")) {
     try {
       const headers = {
         ...(await getAuthHeaders()),
@@ -554,7 +506,7 @@ export async function initiatePaymentSession(
         .initiatePaymentSession(cart, data, {}, headers)
         .then(async (resp) => {
           const cartCacheTag = await getCacheTag("carts")
-          if (cartCacheTag) revalidateTag(cartCacheTag)
+          safeRevalidate(cartCacheTag)
           return resp
         })
     } catch {
@@ -564,25 +516,25 @@ export async function initiatePaymentSession(
 
   const localCart = (await getLocalCartData()) || cart
   const session = {
-    id: `ps_${data.provider_id || "phonepe"}_${Date.now()}`,
-    provider_id: data.provider_id || "phonepe",
-    amount: localCart.total || 0,
+    id: `ps_${data?.provider_id || "phonepe"}_${Date.now()}`,
+    provider_id: data?.provider_id || "phonepe",
+    amount: localCart?.total || 0,
     status: "authorized",
-    data: data.data || {},
+    data: data?.data || {},
   }
 
   const updatedCart = {
     ...localCart,
     payment_collection: {
       id: `paycol_${Date.now()}`,
-      amount: localCart.total || 0,
+      amount: localCart?.total || 0,
       payment_sessions: [session],
       status: "authorized",
     },
   }
 
   await setLocalCartData(updatedCart)
-  return session as any
+  return session as unknown as HttpTypes.StorePaymentSession
 }
 
 export async function applyPromotions(codes: string[]) {
@@ -602,10 +554,10 @@ export async function applyPromotions(codes: string[]) {
         .update(cartId, { promo_codes: codes }, {}, headers)
         .then(async () => {
           const cartCacheTag = await getCacheTag("carts")
-          if (cartCacheTag) revalidateTag(cartCacheTag)
+          safeRevalidate(cartCacheTag)
 
           const fulfillmentCacheTag = await getCacheTag("fulfillment")
-          if (fulfillmentCacheTag) revalidateTag(fulfillmentCacheTag)
+          safeRevalidate(fulfillmentCacheTag)
         })
     } catch {
       // fallback
@@ -623,7 +575,7 @@ export async function applyPromotions(codes: string[]) {
     await setLocalCartData(recalculated)
 
     const cartCacheTag = await getCacheTag("carts")
-    if (cartCacheTag) revalidateTag(cartCacheTag)
+    safeRevalidate(cartCacheTag)
   }
 }
 
@@ -737,7 +689,7 @@ export async function placeOrder(cartId?: string) {
         .complete(id, {}, headers)
         .then(async (res) => {
           const cartCacheTag = await getCacheTag("carts")
-          if (cartCacheTag) revalidateTag(cartCacheTag)
+          safeRevalidate(cartCacheTag)
           return res
         })
 
@@ -746,7 +698,7 @@ export async function placeOrder(cartId?: string) {
           cartRes.order.shipping_address?.country_code?.toLowerCase() || "in"
 
         const orderCacheTag = await getCacheTag("orders")
-        if (orderCacheTag) revalidateTag(orderCacheTag)
+        safeRevalidate(orderCacheTag)
 
         await removeCartId()
         await removeLocalCartData()
@@ -821,7 +773,7 @@ export async function placeOrder(cartId?: string) {
   await removeLocalCartData()
 
   const orderCacheTag = await getCacheTag("orders")
-  if (orderCacheTag) revalidateTag(orderCacheTag)
+  safeRevalidate(orderCacheTag)
 
   redirect(`/${countryCode}/order/${orderId}/confirmed`)
 }
@@ -833,14 +785,14 @@ export async function updateRegion(countryCode: string, currentPath: string) {
   if (cartId) {
     await updateCart({ region_id: region.id })
     const cartCacheTag = await getCacheTag("carts")
-    if (cartCacheTag) revalidateTag(cartCacheTag)
+    safeRevalidate(cartCacheTag)
   }
 
   const regionCacheTag = await getCacheTag("regions")
-  if (regionCacheTag) revalidateTag(regionCacheTag)
+  safeRevalidate(regionCacheTag)
 
   const productsCacheTag = await getCacheTag("products")
-  if (productsCacheTag) revalidateTag(productsCacheTag)
+  safeRevalidate(productsCacheTag)
 
   redirect(`/${countryCode}${currentPath}`)
 }
@@ -890,7 +842,7 @@ export async function listCartOptions() {
           is_tax_inclusive: true,
           price_type: "flat",
         },
-      ] as any,
+      ] as unknown as HttpTypes.StoreCartShippingOption[],
     }
   } catch {
     return { shipping_options: [] }

@@ -80,11 +80,12 @@ const CartDropdown = ({
       onMouseLeave={close}
     >
       <Popover className="relative h-full">
-        <PopoverButton className="h-full focus:outline-none">
+        <PopoverButton as="div" className="h-full focus:outline-none cursor-pointer" suppressHydrationWarning>
           <LocalizedClientLink
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs sm:text-sm shadow-sm transition-all hover:scale-105"
             href="/cart"
             data-testid="nav-cart-link"
+            suppressHydrationWarning
           >
             <span className="relative flex items-center justify-center">
               <svg
@@ -106,7 +107,7 @@ const CartDropdown = ({
                 </span>
               )}
             </span>
-            <span className="hidden sm:inline">ಬುಟ್ಟಿ / Cart ({totalItems})</span>
+            <span className="hidden sm:inline">Cart ({totalItems})</span>
             <span className="sm:hidden">({totalItems})</span>
           </LocalizedClientLink>
         </PopoverButton>

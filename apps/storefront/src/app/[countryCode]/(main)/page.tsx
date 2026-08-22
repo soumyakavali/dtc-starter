@@ -9,7 +9,7 @@ import FarmerTestimonials from "@modules/home/components/farmer-testimonials"
 import { getRegion } from "@lib/data/regions"
 
 export const metadata: Metadata = {
-  title: "BioTill & Swash Biotech - Direct Agricultural Biotechnology Solutions",
+  title: "BioTill Biotech - Direct Agricultural Biotechnology Solutions",
   description:
     "100% certified bio-fertilizers, biopesticides, and crop stimulants for farmers. Clean pricing: Powder at ₹150 (1 Kg) & Liquid at ₹350 (1 L). Direct farm delivery across India.",
 }

@@ -46,6 +46,7 @@ export default function CategoryTemplate({
     >
       <RefinementList
         sortBy={sort}
+        currentCategoryHandle={category.handle}
         data-testid="sort-by-container"
         hideOptionsPicker
       />

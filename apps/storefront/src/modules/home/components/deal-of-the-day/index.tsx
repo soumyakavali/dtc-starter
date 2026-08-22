@@ -243,7 +243,7 @@ export default function DealOfTheDay({
             <div className="flex items-center gap-2 mb-2">
               <span className="px-3 py-1 bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black rounded-full uppercase tracking-wider flex items-center gap-1">
                 <span>🔥</span>
-                <span>Swash Biotech Catalog & Deals</span>
+                <span>BioTill Biotech Catalog & Deals</span>
               </span>
               <span className="text-xs text-emerald-700 font-bold bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
                 100% Certified Bio-Inputs
@@ -261,6 +261,7 @@ export default function DealOfTheDay({
           <div className="flex items-center gap-1.5 p-1.5 bg-white rounded-2xl border border-gray-200 shadow-xs overflow-x-auto no-scrollbar">
             <button
               onClick={() => setActiveTab("all")}
+              suppressHydrationWarning
               className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 activeTab === "all"
                   ? "bg-emerald-700 text-white shadow-sm"
@@ -271,6 +272,7 @@ export default function DealOfTheDay({
             </button>
             <button
               onClick={() => setActiveTab("deals")}
+              suppressHydrationWarning
               className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1 ${
                 activeTab === "deals"
                   ? "bg-amber-400 text-amber-950 font-black shadow-sm"
@@ -282,6 +284,7 @@ export default function DealOfTheDay({
             </button>
             <button
               onClick={() => setActiveTab("fertilizers")}
+              suppressHydrationWarning
               className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 activeTab === "fertilizers"
                   ? "bg-emerald-700 text-white shadow-sm"
@@ -292,6 +295,7 @@ export default function DealOfTheDay({
             </button>
             <button
               onClick={() => setActiveTab("pesticides")}
+              suppressHydrationWarning
               className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 activeTab === "pesticides"
                   ? "bg-emerald-700 text-white shadow-sm"
@@ -302,6 +306,7 @@ export default function DealOfTheDay({
             </button>
             <button
               onClick={() => setActiveTab("liquids")}
+              suppressHydrationWarning
               className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 activeTab === "liquids"
                   ? "bg-emerald-700 text-white shadow-sm"
@@ -405,6 +410,7 @@ export default function DealOfTheDay({
                         type="button"
                         onClick={(e) => handleQuickAdd(product, e)}
                         disabled={addingId === product.id}
+                        suppressHydrationWarning
                         className={`px-3 py-1.5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 border ${
                           successId === product.id
                             ? "bg-emerald-600 border-emerald-600 text-white"

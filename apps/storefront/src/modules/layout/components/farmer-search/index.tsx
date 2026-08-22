@@ -60,10 +60,12 @@ export default function FarmerSearchBar() {
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           placeholder="ಉತ್ಪನ್ನ ಹುಡುಕಿ (ಟ್ರೈಕೋಡರ್ಮಾ, ಸುಡೋಮೊನಾಸ್, ಮೆಟಾರೈಸಿಯಂ, ವ್ಯಾಮ್...)"
           className="w-full pl-10 pr-24 py-2 text-xs sm:text-sm bg-emerald-50/70 hover:bg-emerald-50 focus:bg-white text-gray-900 border border-emerald-200 focus:border-emerald-600 rounded-full outline-none transition-all shadow-inner focus:ring-2 focus:ring-emerald-600/20"
+          suppressHydrationWarning
         />
         <button
           type="submit"
           className="absolute right-1.5 px-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-full transition-colors flex items-center gap-1 shadow-sm"
+          suppressHydrationWarning
         >
           <span>ಹುಡುಕಿ</span>
         </button>
@@ -82,6 +84,7 @@ export default function FarmerSearchBar() {
                 type="button"
                 onMouseDown={() => selectSuggestion(item.query)}
                 className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-medium border border-emerald-200/60 transition-colors"
+                suppressHydrationWarning
               >
                 {item.label}
               </button>
