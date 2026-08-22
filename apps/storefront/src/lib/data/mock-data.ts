@@ -460,11 +460,11 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     is_giftcard: false,
     status: "published",
     thumbnail:
-      "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1585314062604-1a357de8b000?w=800&auto=format&fit=crop&q=80",
     images: [
       {
         id: "img_tri_liq_1",
-        url: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&auto=format&fit=crop&q=80",
+        url: "https://images.unsplash.com/photo-1585314062604-1a357de8b000?w=800&auto=format&fit=crop&q=80",
       },
     ],
     collection_id: "col_liquid",
@@ -522,11 +522,11 @@ export const MOCK_PRODUCTS: (HttpTypes.StoreProduct & {
     is_giftcard: false,
     status: "published",
     thumbnail:
-      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800&auto=format&fit=crop&q=80",
     images: [
       {
         id: "img_pse_liq_1",
-        url: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=80",
+        url: "https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800&auto=format&fit=crop&q=80",
       },
     ],
     collection_id: "col_liquid",

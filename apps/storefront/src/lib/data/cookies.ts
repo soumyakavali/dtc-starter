@@ -109,24 +109,130 @@ export const removePendingCustomer = async () => {
   })
 }
 
+let memoryCartId: string | null = null
+let memoryLocalCart: any = null
+let memoryLastOrder: any = null
+
 export const getCartId = async () => {
-  const cookies = await nextCookies()
-  return cookies.get("_medusa_cart_id")?.value
+  if (memoryCartId) return memoryCartId
+  try {
+    const cookies = await nextCookies()
+    const val = cookies.get("_medusa_cart_id")?.value
+    if (val) memoryCartId = val
+    return val
+  } catch {
+    return memoryCartId
+  }
 }
 
 export const setCartId = async (cartId: string) => {
-  const cookies = await nextCookies()
-  cookies.set("_medusa_cart_id", cartId, {
-    maxAge: 60 * 60 * 24 * 7,
-    httpOnly: true,
-    sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
-  })
+  memoryCartId = cartId
+  try {
+    const cookies = await nextCookies()
+    cookies.set("_medusa_cart_id", cartId, {
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    })
+  } catch {
+    // ignore
+  }
 }
 
 export const removeCartId = async () => {
-  const cookies = await nextCookies()
-  cookies.set("_medusa_cart_id", "", {
-    maxAge: -1,
-  })
+  memoryCartId = null
+  try {
+    const cookies = await nextCookies()
+    cookies.set("_medusa_cart_id", "", {
+      maxAge: -1,
+      path: "/",
+    })
+  } catch {
+    // ignore
+  }
+}
+
+export const getLocalCartData = async (): Promise<any | null> => {
+  if (memoryLocalCart) return memoryLocalCart
+  try {
+    const cookies = await nextCookies()
+    const value = cookies.get("_medusa_cart_data")?.value
+    if (value) {
+      const parsed = JSON.parse(decodeURIComponent(value))
+      memoryLocalCart = parsed
+      return parsed
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+export const setLocalCartData = async (data: any) => {
+  memoryLocalCart = data
+  try {
+    const cookies = await nextCookies()
+    const jsonStr = encodeURIComponent(JSON.stringify(data))
+    cookies.set("_medusa_cart_data", jsonStr, {
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    })
+  } catch (e) {
+    console.error("Failed to set local cart cookie", e)
+  }
+}
+
+export const removeLocalCartData = async () => {
+  memoryLocalCart = null
+  try {
+    const cookies = await nextCookies()
+    cookies.set("_medusa_cart_data", "", {
+      maxAge: -1,
+      path: "/",
+    })
+  } catch {
+    // ignore
+  }
+}
+
+export const getLastOrderData = async (orderId?: string): Promise<any | null> => {
+  if (memoryLastOrder && (!orderId || memoryLastOrder.id === orderId)) {
+    return memoryLastOrder
+  }
+  try {
+    const cookies = await nextCookies()
+    const value = cookies.get("_medusa_last_order")?.value
+    if (value) {
+      const order = JSON.parse(decodeURIComponent(value))
+      memoryLastOrder = order
+      if (!orderId || order.id === orderId) {
+        return order
+      }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+export const setLastOrderData = async (order: any) => {
+  memoryLastOrder = order
+  try {
+    const cookies = await nextCookies()
+    const jsonStr = encodeURIComponent(JSON.stringify(order))
+    cookies.set("_medusa_last_order", jsonStr, {
+      maxAge: 60 * 60 * 24 * 3,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    })
+  } catch (e) {
+    console.error("Failed to set last order cookie", e)
+  }
 }

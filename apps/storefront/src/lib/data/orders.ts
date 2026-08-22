@@ -1,7 +1,7 @@
 "use server"
 
 import { sdk } from "@lib/config"
-import { getAuthHeaders, getCacheOptions } from "./cookies"
+import { getAuthHeaders, getCacheOptions, getLastOrderData } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
 
 export const retrieveOrder = async (id: string) => {
@@ -14,7 +14,7 @@ export const retrieveOrder = async (id: string) => {
       ...(await getCacheOptions("orders")),
     }
 
-    return await sdk.client
+    const res = await sdk.client
       .fetch<HttpTypes.StoreOrderResponse>(`/store/orders/${id}`, {
         method: "GET",
         query: {
@@ -27,9 +27,16 @@ export const retrieveOrder = async (id: string) => {
       })
       .then(({ order }) => order)
       .catch(() => null)
+
+    if (res && res.id) {
+      return res
+    }
   } catch {
-    return null
+    // continue to local fallback
   }
+
+  // Fallback to locally placed order
+  return await getLastOrderData(id)
 }
 
 export const listOrders = async (

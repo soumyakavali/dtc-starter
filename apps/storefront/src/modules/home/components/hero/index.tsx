@@ -1,18 +1,18 @@
+import React from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import LeafIcon from "@modules/common/icons/leaf"
 import PhonePeIcon from "@modules/common/icons/phonepe"
 import PaytmIcon from "@modules/common/icons/paytm"
 import UpiIcon from "@modules/common/icons/upi"
 
 const Hero = () => {
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-emerald-900 via-emerald-950 to-emerald-900 text-white py-12 lg:py-16 border-b border-emerald-800">
-      {/* Background organic wave overlay pattern */}
+    <section className="relative overflow-hidden bg-gradient-to-b from-emerald-900 via-emerald-950 to-emerald-900 text-white py-12 lg:py-16 border-b border-emerald-800">
+      {/* Background organic light pattern */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
           <defs>
-            <pattern id="agri-pattern" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M30 10 C 20 20, 20 40, 30 50 C 40 40, 40 20, 30 10 Z" fill="none" stroke="#FFFFFF" strokeWidth="1.5" />
+            <pattern id="agri-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M20 5 C 10 15, 10 25, 20 35 C 30 25, 30 15, 20 5 Z" fill="none" stroke="#FFFFFF" strokeWidth="1" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#agri-pattern)" />
@@ -21,40 +21,39 @@ const Hero = () => {
 
       <div className="content-container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left Column: Bio Products Headline & Showcase */}
+          {/* Left Column: Swash Biotech Style Headline & Showcase */}
           <div className="lg:col-span-7 flex flex-col items-start text-left space-y-5">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-800/80 border border-emerald-600/60 text-emerald-200 text-xs font-semibold shadow-inner">
-              <LeafIcon size={16} className="text-emerald-400" />
-              <span>100% ಶುದ್ಧ ಜೈವಿಕ ಕೃಷಿ ಉತ್ಪನ್ನಗಳ ನೇರ ಮಾರಾಟ • Direct to Farmer</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-800/90 border border-emerald-600/70 text-emerald-200 text-xs font-bold shadow-inner">
+              <span className="text-emerald-400 text-sm">🌿</span>
+              <span>100% Certified Bio-Agri Inputs • Direct Factory-to-Farm</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              ಉತ್ತಮ ಇಳುವರಿಗೆ <br />
-              <span className="text-emerald-400 underline decoration-amber-400 decoration-wavy decoration-2">
-                ಜೈವಿಕ ಕೃಷಿ ಉತ್ಪನ್ನಗಳು
-              </span>{" "}
-              (Bio-Agri Inputs).
+              Science & Bio-Innovation for <br />
+              <span className="text-emerald-300 underline decoration-amber-400 decoration-wavy decoration-2">
+                High-Yield Sustainable Farming
+              </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-emerald-100/90 max-w-2xl font-normal leading-relaxed">
-              ಟ್ರೈಕೋಡರ್ಮಾ, ಸುಡೋಮೊನಾಸ್, ಮೆಟಾರೈಸಿಯಂ, ವ್ಯಾಮ್, ಪೆಸಿಲೋಮೈಸಿಸ್, ಕಾಂಪೊಸ್ಟ್ ಕಲ್ಚರ್ ಮತ್ತು ಬಯೋ NPK ಕನ್ಸಾರ್ಸಿಯಂ — ನೇರವಾಗಿ ರೈತರಿಗೆ ತಲುಪಿಸಲಾಗುತ್ತದೆ.
+            <p className="text-sm sm:text-base text-emerald-100/90 max-w-2xl font-normal leading-relaxed">
+              ಉತ್ತಮ ಇಳುವರಿ ಮತ್ತು ರೋಗಮುಕ್ತ ಬೆಳೆಗಾಗಿ ಸಂಶೋಧನಾ ಆಧಾರಿತ ಜೈವಿಕ ಶಿಲೀಂಧ್ರನಾಶಕ, ಕೀಟನಾಶಕ ಹಾಗೂ ಸಾವಯವ ಗೊಬ್ಬರಗಳು. Direct delivery to farmers across Karnataka & India.
             </p>
 
-            {/* Clear Pricing Summary Badges */}
+            {/* Clear Transparent Pricing Pills */}
             <div className="flex flex-wrap gap-3 pt-1">
-              <div className="flex items-center gap-2 bg-emerald-800/90 border border-amber-400/50 px-3.5 py-2 rounded-xl">
-                <span className="text-lg">📦</span>
+              <div className="flex items-center gap-2.5 bg-emerald-800/90 border border-amber-400/60 px-3.5 py-2 rounded-2xl shadow-sm">
+                <span className="text-xl">📦</span>
                 <div>
-                  <p className="text-[11px] text-emerald-200 uppercase font-bold">ಪೌಡರ್ ಉತ್ಪನ್ನಗಳು (1 ಕೆಜಿ)</p>
-                  <p className="text-base font-black text-amber-300">₹150/- ಪ್ರತಿ ಪ್ಯಾಕ್</p>
+                  <p className="text-[10px] text-emerald-200 uppercase font-extrabold">ಪೌಡರ್ ಉತ್ಪನ್ನಗಳು (1 Kg Pack)</p>
+                  <p className="text-base font-black text-amber-300">₹150/- <span className="text-xs text-emerald-200 font-normal">Fixed Price</span></p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 bg-emerald-800/90 border border-emerald-500/50 px-3.5 py-2 rounded-xl">
-                <span className="text-lg">🧪</span>
+              <div className="flex items-center gap-2.5 bg-emerald-800/90 border border-emerald-500/60 px-3.5 py-2 rounded-2xl shadow-sm">
+                <span className="text-xl">🧪</span>
                 <div>
-                  <p className="text-[11px] text-emerald-200 uppercase font-bold">ಲಿಕ್ವಿಡ್ ಉತ್ಪನ್ನಗಳು (1 ಲೀಟರ್)</p>
-                  <p className="text-base font-black text-emerald-300">₹350/- ಪ್ರತಿ ಬಾಟಲ್</p>
+                  <p className="text-[10px] text-emerald-200 uppercase font-extrabold">ಲಿಕ್ವಿಡ್ ಕನ್ಸಾರ್ಸಿಯಂ (1 L Bottle)</p>
+                  <p className="text-base font-black text-emerald-300">₹350/- <span className="text-xs text-emerald-200 font-normal">Drip Concentrate</span></p>
                 </div>
               </div>
             </div>
@@ -63,83 +62,103 @@ const Hero = () => {
             <div className="flex flex-wrap gap-3 pt-2 w-full sm:w-auto">
               <LocalizedClientLink
                 href="/store"
-                className="px-6 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 shadow-lg shadow-amber-900/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+                className="px-6 py-3.5 rounded-xl font-black text-xs sm:text-sm bg-amber-400 hover:bg-amber-300 text-amber-950 shadow-lg shadow-amber-950/30 transition-all hover:scale-105 flex items-center justify-center gap-2"
               >
-                <span>ಎಲ್ಲಾ 10 ಉತ್ಪನ್ನಗಳನ್ನು ನೋಡಿ (Shop All 10 Items)</span>
+                <span>Shop All 10 Bio-Products</span>
                 <span>→</span>
               </LocalizedClientLink>
 
-              <LocalizedClientLink
-                href="/collections/powder-products"
-                className="px-5 py-3 rounded-xl font-semibold text-sm bg-emerald-800/80 hover:bg-emerald-700/80 border border-emerald-600/70 text-white transition-all flex items-center justify-center"
+              <a
+                href="#dosage-calculator"
+                className="px-5 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-emerald-800/80 hover:bg-emerald-700/80 border border-emerald-600/80 text-white transition-all flex items-center justify-center gap-1.5"
               >
-                ಪೌಡರ್ @ ₹150
-              </LocalizedClientLink>
+                <span>🔬 Crop Dosage Calculator</span>
+              </a>
 
-              <LocalizedClientLink
-                href="/collections/liquid-products"
-                className="px-5 py-3 rounded-xl font-semibold text-sm bg-emerald-800/80 hover:bg-emerald-700/80 border border-emerald-600/70 text-white transition-all flex items-center justify-center"
+              <a
+                href="#products-showcase"
+                className="px-4 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-emerald-900/60 hover:bg-emerald-800/60 border border-emerald-700 text-emerald-200 transition-all flex items-center justify-center"
               >
-                ಲಿಕ್ವಿಡ್ @ ₹350
-              </LocalizedClientLink>
+                🔥 Deals of the Day
+              </a>
             </div>
           </div>
 
-          {/* Right Column: Quick Spotlight on Best-Selling Trichoderma & Bio NPK */}
+          {/* Right Column: Clean Spotlight Cards */}
           <div className="lg:col-span-5 space-y-4">
-            {/* Spotlight 1: Powder */}
-            <div className="bg-white rounded-2xl p-5 text-gray-900 shadow-xl border border-emerald-100 relative">
+            {/* Spotlight 1: Powder Bestseller */}
+            <div className="bg-white rounded-2xl p-4 sm:p-5 text-gray-900 shadow-xl border border-emerald-100 relative">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-lg">
+                  <div className="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xl">
                     🛡️
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-sm sm:text-base">ಟ್ರೈಕೋಡರ್ಮಾ ಪೌಡರ್ (Trichoderma)</h3>
-                    <p className="text-xs text-emerald-700 font-medium">ಬೇರು ಕೊಳೆತ ಮತ್ತು ಸೊರಗು ರೋಗ ತಡೆಗೆ • 1 ಕೆಜಿ</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="bg-emerald-700 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                        POWDER • ₹150
+                      </span>
+                      <span className="text-[10px] text-emerald-700 font-bold">100% Bio</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-sm mt-0.5">
+                      Trichoderma Viride Bio-Fungicide
+                    </h3>
+                    <p className="text-xs text-gray-500 line-clamp-1">
+                      ಟ್ರೈಕೋಡರ್ಮಾ • ಬೇರು ಕೊಳೆತ ಮತ್ತು ಸೊರಗು ರೋಗ ತಡೆಗೆ
+                    </p>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <span className="text-xl font-black text-emerald-900">₹150</span>
-                  <p className="text-[10px] text-gray-500">1 ಕೆಜಿ ಪ್ಯಾಕ್</p>
+                  <span className="text-lg font-black text-emerald-950">₹150</span>
+                  <p className="text-[10px] text-gray-400">1 Kg Pack</p>
                 </div>
               </div>
               <LocalizedClientLink
                 href="/products/trichoderma-powder"
-                className="mt-3 w-full block text-center py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold rounded-lg text-xs transition-colors shadow-sm"
+                className="mt-3 w-full block text-center py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-xs"
               >
-                ಖರೀದಿಸಿ / Order Now →
+                View & Buy (ಖರೀದಿಸಿ) →
               </LocalizedClientLink>
             </div>
 
-            {/* Spotlight 2: Liquid */}
-            <div className="bg-white rounded-2xl p-5 text-gray-900 shadow-xl border border-emerald-100 relative">
+            {/* Spotlight 2: Liquid Bestseller */}
+            <div className="bg-white rounded-2xl p-4 sm:p-5 text-gray-900 shadow-xl border border-emerald-100 relative">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-lg">
+                  <div className="w-11 h-11 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold text-xl">
                     🧪
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-sm sm:text-base">ಬಯೋ ಎನ್ಪಿಕೆ ಕನ್ಸಾರ್ಸಿಯಂ (Bio NPK)</h3>
-                    <p className="text-xs text-emerald-700 font-medium">ಸಾರಜನಕ, ರಂಜಕ, ಪೊಟ್ಯಾಶ್ ದ್ರವ ಗೊಬ್ಬರ • 1 ಲೀಟರ್</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="bg-amber-500 text-amber-950 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                        LIQUID • ₹350
+                      </span>
+                      <span className="text-[10px] text-amber-800 font-bold">Drip Grade</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-sm mt-0.5">
+                      Bio NPK Liquid Consortium (N+P+K)
+                    </h3>
+                    <p className="text-xs text-gray-500 line-clamp-1">
+                      ಬಯೋ ಎನ್ಪಿಕೆ • ಸಂಪೂರ್ಣ ದ್ರವ ಗೊಬ್ಬರ (1 ಲೀಟರ್)
+                    </p>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <span className="text-xl font-black text-emerald-900">₹350</span>
-                  <p className="text-[10px] text-gray-500">1 ಲೀಟರ್ ಬಾಟಲ್</p>
+                  <span className="text-lg font-black text-emerald-950">₹350</span>
+                  <p className="text-[10px] text-gray-400">1 L Bottle</p>
                 </div>
               </div>
               <LocalizedClientLink
                 href="/products/bio-npk-consortium-liquid"
-                className="mt-3 w-full block text-center py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold rounded-lg text-xs transition-colors shadow-sm"
+                className="mt-3 w-full block text-center py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-xs"
               >
-                ಖರೀದಿಸಿ / Order Now →
+                View & Buy (ಖರೀದಿಸಿ) →
               </LocalizedClientLink>
             </div>
 
             {/* Payment Trust Bar */}
-            <div className="flex items-center justify-between gap-2 p-2.5 bg-emerald-900/60 rounded-xl border border-emerald-700/60 text-xs">
-              <span className="text-emerald-200 text-[11px] font-semibold">ಸುರಕ್ಷಿತ ಪಾವತಿ:</span>
+            <div className="flex items-center justify-between gap-2 p-2.5 bg-emerald-900/70 rounded-xl border border-emerald-700/60 text-xs">
+              <span className="text-emerald-200 text-[11px] font-semibold">Safe & Instant Payments:</span>
               <div className="flex items-center gap-2">
                 <PhonePeIcon size={20} />
                 <PaytmIcon size={20} />
@@ -150,7 +169,7 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   )
 }
 

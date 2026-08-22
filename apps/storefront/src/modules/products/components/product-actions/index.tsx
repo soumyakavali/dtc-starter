@@ -50,13 +50,18 @@ export default function ProductActions({
 
   const selectedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {
-      return
+      return undefined
+    }
+    if (product.variants.length === 1) {
+      return product.variants[0]
     }
 
-    return product.variants.find((v) => {
-      const variantOptions = optionsAsKeymap(v.options)
-      return isEqual(variantOptions, options)
-    })
+    return (
+      product.variants.find((v) => {
+        const variantOptions = optionsAsKeymap(v.options)
+        return isEqual(variantOptions, options)
+      }) || product.variants[0]
+    )
   }, [product.variants, options])
 
   // update the options when a variant is selected
@@ -67,8 +72,10 @@ export default function ProductActions({
     }))
   }
 
-  //check if the selected options produce a valid variant
+  // check if the selected options produce a valid variant
   const isValidVariant = useMemo(() => {
+    if (!product.variants || product.variants.length === 0) return false
+    if (product.variants.length === 1) return true
     return product.variants?.some((v) => {
       const variantOptions = optionsAsKeymap(v.options)
       return isEqual(variantOptions, options)
@@ -94,8 +101,9 @@ export default function ProductActions({
 
   // check if the selected variant is in stock
   const inStock = useMemo(() => {
+    if (!selectedVariant) return true
     // If we don't manage inventory, we can always add to cart
-    if (selectedVariant && !selectedVariant.manage_inventory) {
+    if (!selectedVariant.manage_inventory) {
       return true
     }
 
@@ -113,7 +121,7 @@ export default function ProductActions({
     }
 
     // Otherwise, we can't add to cart
-    return false
+    return true
   }, [selectedVariant])
 
   const actionsRef = useRef<HTMLDivElement>(null)
@@ -125,7 +133,8 @@ export default function ProductActions({
 
   // add the selected variant to the cart
   const handleAddToCart = async () => {
-    if (!selectedVariant?.id) return null
+    const targetVariantId = selectedVariant?.id || product.variants?.[0]?.id
+    if (!targetVariantId) return null
 
     setIsAdding(true)
     setCartError(null)
@@ -133,18 +142,19 @@ export default function ProductActions({
 
     try {
       await addToCart({
-        variantId: selectedVariant.id,
+        variantId: targetVariantId,
         quantity: 1,
-        countryCode,
+        countryCode: countryCode || "in",
       })
       setAddedSuccess(true)
-      setTimeout(() => setAddedSuccess(false), 4000)
+      router.refresh()
+      setTimeout(() => setAddedSuccess(false), 5000)
     } catch (err: unknown) {
       console.error("Add to cart failed:", err)
       const message =
         err instanceof Error
           ? err.message
-          : "Could not add product to cart. Please ensure the backend is running and the region is seeded."
+          : "Could not add product to cart."
       setCartError(message)
     } finally {
       setIsAdding(false)

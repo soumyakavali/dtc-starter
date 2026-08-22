@@ -1,0 +1,74 @@
+services:
+  # -------------------------------------------------------------
+  # 1. Medusa Backend Web Service (Node.js 20+, Medusa v2)
+  # -------------------------------------------------------------
+  - type: web
+    name: biotill-backend
+    runtime: node
+    plan: starter
+    region: oregon # or singapore / frankfurt
+    buildCommand: npm install && cd apps/backend && npx medusa db:migrate && npm run build
+    startCommand: cd apps/backend && npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: biotill-postgres
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+      - key: STORE_CORS
+        value: https://biotill-storefront.onrender.com,http://localhost:3000,http://localhost:8000
+      - key: ADMIN_CORS
+        value: https://biotill-backend.onrender.com,http://localhost:9000
+      - key: AUTH_CORS
+        value: https://biotill-backend.onrender.com,https://biotill-storefront.onrender.com,http://localhost:3000
+      - key: MEDUSA_ADMIN_ONBOARDING_TYPE
+        value: default
+      - key: PHONEPE_MERCHANT_ID
+        value: PHONEPE_DEMO_MID
+      - key: PHONEPE_SALT_KEY
+        value: dummy_salt
+      - key: PAYTM_MID
+        value: PAYTM_DEMO_MID
+      - key: PAYTM_MERCHANT_KEY
+        value: dummy_mkey
+
+  # -------------------------------------------------------------
+  # 2. Next.js Storefront Web Service (React 19, Next.js 15)
+  # -------------------------------------------------------------
+  - type: web
+    name: biotill-storefront
+    runtime: node
+    plan: starter
+    region: oregon # match database & backend region
+    buildCommand: npm install && cd apps/storefront && npm run build
+    startCommand: cd apps/storefront && npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_MEDUSA_BACKEND_URL
+        fromService:
+          type: web
+          name: biotill-backend
+          property: host
+      - key: NEXT_PUBLIC_BASE_URL
+        value: https://biotill-storefront.onrender.com
+      - key: NEXT_PUBLIC_DEFAULT_REGION
+        value: in
+      - key: NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+        sync: false
+
+# ---------------------------------------------------------------
+  # 3. PostgreSQL Database (PostgreSQL 16)
+# ---------------------------------------------------------------
+databases:
+  - name: biotill-postgres
+    databaseName: medusa_biotill
+    user: medusa_user
+    plan: starter
+    region: oregon

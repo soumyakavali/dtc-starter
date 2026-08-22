@@ -1,19 +1,13 @@
-import { listCategories } from "@lib/data/categories"
-import { listCollections } from "@lib/data/collections"
+import React from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import LeafIcon from "@modules/common/icons/leaf"
 import PhonePeIcon from "@modules/common/icons/phonepe"
 import PaytmIcon from "@modules/common/icons/paytm"
 import UpiIcon from "@modules/common/icons/upi"
 
-export default async function Footer() {
-  const { collections } = await listCollections({
-    fields: "*products",
-  }).catch(() => ({ collections: [] }))
-  const productCategories = await listCategories().catch(() => [])
-
+export default function Footer() {
   return (
-    <footer className="border-t border-emerald-900/30 bg-emerald-950 text-emerald-100 w-full font-sans">
+    <footer id="contact" className="border-t border-emerald-900/30 bg-emerald-950 text-emerald-100 w-full font-sans">
       <div className="content-container flex flex-col w-full py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-emerald-800/80">
           {/* Brand Info */}
@@ -27,33 +21,33 @@ export default async function Footer() {
               </div>
               <div className="flex flex-col text-left">
                 <span className="font-extrabold text-xl tracking-tight text-white flex items-center gap-1">
-                  BioTill<span className="text-emerald-400">Agri</span>
+                  BioTill<span className="text-emerald-400">Biotech</span>
                 </span>
                 <span className="text-[9px] uppercase font-bold tracking-widest text-emerald-300">
-                  BIOTILL AGRI PRIVATE LIMITED
+                  SWASH BIOTECH SOLUTIONS
                 </span>
               </div>
             </LocalizedClientLink>
             <p className="text-xs text-emerald-200/90 leading-relaxed max-w-sm">
-              ರೈತರಿಗೆ ನೇರ ತಂತ್ರಜ್ಞಾನ ಆಧಾರಿತ 100% ಶುದ್ಧ ಜೈವಿಕ ಕೃಷಿ ಉತ್ಪನ್ನಗಳು. ಉತ್ತಮ ಇಳುವರಿ ಮತ್ತು ಮಣ್ಣಿನ ಫಲವತ್ತತೆಗಾಗಿ ಪ್ರಮಾಣೀಕೃತ ಬಯೋ-ಫಂಗಿಸೈಡ್, ಬ್ಯಾಕ್ಟೀರಿಯಾನಾಶಕ, ಕೀಟನಾಶಕ ಹಾಗೂ ಸಾವಯವ ಗೊಬ್ಬರಗಳು.
+              Transforming agriculture through science, sustainability, and bio-innovation. High-potency certified bio-fertilizers, biopesticides, and crop stimulants delivered directly to farmers across India.
             </p>
             <div className="space-y-1.5 text-xs text-emerald-300">
               <p className="flex items-center gap-1.5">
-                <span>🏢</span> <strong>BIOTILL AGRI PRIVATE LIMITED</strong>
+                <span>🏢</span> <strong>SWASH YAKSAZ BIOTECH SOLUTIONS / BIOTILL AGRI</strong>
               </p>
               <p className="flex items-center gap-1.5">
-                <span>🌱</span> <strong>Bio-Certified:</strong> CCOF & NPOP Organic Inputs
+                <span>📍</span> <strong>Agronomy Hub:</strong> Karnataka, India
               </p>
               <p className="flex items-center gap-1.5">
-                <span>🚚</span> <strong>Farmer Doorstep Delivery:</strong> Pan India Farm Dispatch
+                <span>📞</span> <strong>Helpline:</strong> +91 94801 23456 / Support
               </p>
             </div>
           </div>
 
-          {/* Categories */}
+          {/* Bio Categories */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-1.5">
-              <span>🌿</span> ಉತ್ಪನ್ನ ವಿಭಾಗಗಳು (Categories)
+              <span>🌿</span> Product Categories
             </h4>
             <ul className="space-y-2 text-xs text-emerald-200">
               <li>
@@ -61,7 +55,7 @@ export default async function Footer() {
                   className="hover:text-amber-400 transition-colors flex items-center justify-between"
                   href="/collections/powder-products"
                 >
-                  <span>📦 ಪೌಡರ್ ಉತ್ಪನ್ನಗಳು (Powder 1 Kg)</span>
+                  <span>📦 Powder Formulations (1 Kg)</span>
                   <span className="text-amber-400 font-bold">₹150/-</span>
                 </LocalizedClientLink>
               </li>
@@ -70,27 +64,41 @@ export default async function Footer() {
                   className="hover:text-amber-400 transition-colors flex items-center justify-between"
                   href="/collections/liquid-products"
                 >
-                  <span>🧪 ಲಿಕ್ವಿಡ್ ಉತ್ಪನ್ನಗಳು (Liquid 1 L)</span>
+                  <span>🧪 Liquid Consortia (1 L)</span>
                   <span className="text-amber-400 font-bold">₹350/-</span>
                 </LocalizedClientLink>
               </li>
-              {productCategories?.slice(0, 4).map((c) => (
-                <li key={c.id}>
-                  <LocalizedClientLink
-                    className="hover:text-amber-400 transition-colors"
-                    href={`/categories/${c.handle}`}
-                  >
-                    {c.name}
-                  </LocalizedClientLink>
-                </li>
-              ))}
+              <li>
+                <LocalizedClientLink
+                  className="hover:text-amber-400 transition-colors"
+                  href="/products/trichoderma-powder"
+                >
+                  Trichoderma Bio-Fungicide
+                </LocalizedClientLink>
+              </li>
+              <li>
+                <LocalizedClientLink
+                  className="hover:text-amber-400 transition-colors"
+                  href="/products/bio-npk-consortium-liquid"
+                >
+                  Bio NPK Liquid (N+P+K)
+                </LocalizedClientLink>
+              </li>
+              <li>
+                <LocalizedClientLink
+                  className="hover:text-amber-400 transition-colors"
+                  href="/products/vam-powder"
+                >
+                  VAM Endo-Mycorrhiza Booster
+                </LocalizedClientLink>
+              </li>
             </ul>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links & Services */}
           <div className="md:col-span-2 space-y-3">
             <h4 className="font-bold text-white text-sm uppercase tracking-wider">
-              ತ್ವರಿತ ಲಿಂಕ್‌ಗಳು
+              Farmer Services
             </h4>
             <ul className="space-y-2 text-xs text-emerald-200">
               <li>
@@ -98,7 +106,31 @@ export default async function Footer() {
                   className="hover:text-amber-400 transition-colors"
                   href="/store"
                 >
-                  ಎಲ್ಲಾ 10 ಉತ್ಪನ್ನಗಳು (All Products)
+                  All 10 Bio-Products
+                </LocalizedClientLink>
+              </li>
+              <li>
+                <a
+                  className="hover:text-amber-400 transition-colors"
+                  href="#dosage-calculator"
+                >
+                  Dosage Calculator
+                </a>
+              </li>
+              <li>
+                <a
+                  className="hover:text-amber-400 transition-colors"
+                  href="#about-us"
+                >
+                  About Biotech Science
+                </a>
+              </li>
+              <li>
+                <LocalizedClientLink
+                  className="hover:text-amber-400 transition-colors"
+                  href="/account"
+                >
+                  Farmer Account
                 </LocalizedClientLink>
               </li>
               <li>
@@ -106,29 +138,19 @@ export default async function Footer() {
                   className="hover:text-amber-400 transition-colors"
                   href="/cart"
                 >
-                  ಬುಟ್ಟಿ (Cart & Checkout)
+                  Cart & Checkout
                 </LocalizedClientLink>
               </li>
-              {collections?.slice(0, 3).map((c) => (
-                <li key={c.id}>
-                  <LocalizedClientLink
-                    className="hover:text-amber-400 transition-colors"
-                    href={`/collections/${c.handle}`}
-                  >
-                    {c.title}
-                  </LocalizedClientLink>
-                </li>
-              ))}
             </ul>
           </div>
 
-          {/* Payments & Assurance */}
+          {/* Safe Payments & Assurances */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="font-bold text-white text-sm uppercase tracking-wider">
-              ಸುರಕ್ಷಿತ ಪಾವತಿ (Safe Payments)
+              100% Safe Payments
             </h4>
             <p className="text-xs text-emerald-200/90">
-              0% ಹೆಚ್ಚುವರಿ ಶುಲ್ಕದೊಂದಿಗೆ ಎಲ್ಲಾ ಭಾರತೀಯ ಪಾವತಿ ವಿಧಾನಗಳು ಲಭ್ಯ:
+              Zero transaction fees across all Indian digital payment methods and Cash on Delivery:
             </p>
             <div className="flex items-center gap-2 pt-1">
               <div className="p-1.5 bg-white rounded-md shadow-xs">
@@ -142,17 +164,20 @@ export default async function Footer() {
               </div>
             </div>
             <p className="text-[11px] text-emerald-300 pt-1 font-medium">
-              ✓ PhonePe, Paytm, Google Pay, UPI & Cash on Delivery (COD)
+              ✓ PhonePe, Paytm, Google Pay, BHIM UPI & COD
             </p>
+            <div className="pt-2 text-[11px] text-emerald-400 border-t border-emerald-800/80">
+              <p>🌱 CIB & FCO Certified Biological Formulations</p>
+            </div>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 text-xs text-emerald-300">
-          <p>© {new Date().getFullYear()} BIOTILL AGRI PRIVATE LIMITED. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} BioTill & Swash Biotech Solutions. All rights reserved.</p>
           <div className="flex items-center gap-4 text-emerald-400">
-            <span>100% Bio-Organic Certified</span>
+            <span>100% Certified Bio-Organic</span>
             <span>•</span>
-            <span>Made for Indian Farmers</span>
+            <span>Made with Science for Indian Farmers</span>
           </div>
         </div>
       </div>
