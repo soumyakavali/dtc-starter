@@ -1,27 +1,22 @@
 # =============================================================================
-# BIOTILL AGRI - Next.js 15 Standalone Storefront Dockerfile
-# Context: apps/storefront (Render Root Directory: apps/storefront)
+# BIOTILL AGRI - Next.js 15 Storefront Root Dockerfile
+# Context: Root Monorepo Directory
 # =============================================================================
 
-# 1. Base Stage
 FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# 2. Dependencies Stage
 FROM base AS deps
-WORKDIR /app
-COPY package.json package-lock.json* ./
+WORKDIR /app/apps/storefront
+COPY apps/storefront/package.json apps/storefront/package-lock.json* ./
 RUN npm install
 
-# 3. Builder Stage
 FROM base AS builder
-WORKDIR /app
+WORKDIR /app/apps/storefront
+COPY --from=deps /app/apps/storefront/node_modules ./node_modules
+COPY apps/storefront ./
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Build-time environment variables
 ARG NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://localhost:9000
 ARG NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=""
 ARG NEXT_PUBLIC_BASE_URL=http://localhost:3000
@@ -38,7 +33,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
-# 4. Production Runner Stage
 FROM node:20-alpine AS runner
 WORKDIR /app
 
@@ -47,17 +41,15 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Non-root security user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy dependencies and build artifacts
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/next.config.js ./next.config.js
-COPY --from=builder /app/check-env-variables.js ./check-env-variables.js
+COPY --from=builder /app/apps/storefront/public ./public
+COPY --from=builder /app/apps/storefront/package.json ./package.json
+COPY --from=builder /app/apps/storefront/node_modules ./node_modules
+COPY --from=builder /app/apps/storefront/.next ./.next
+COPY --from=builder /app/apps/storefront/next.config.js ./next.config.js
+COPY --from=builder /app/apps/storefront/check-env-variables.js ./check-env-variables.js
 
 USER nextjs
 
