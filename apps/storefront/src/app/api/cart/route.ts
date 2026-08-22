@@ -7,6 +7,7 @@ import {
   applyPromotions,
   getOrSetCart,
 } from "@lib/data/cart"
+import { retrieveCustomer } from "@lib/data/customer"
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,7 +29,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action, variantId, quantity = 1, countryCode = "in", codes, lineId } = body
 
+    // 1. Enforce Farmer Authentication Gate when adding items to cart
     if (action === "add" || variantId) {
+      const customer = await retrieveCustomer().catch(() => null)
+      if (!customer) {
+        return NextResponse.json(
+          {
+            success: false,
+            requireAuth: true,
+            redirect: `/${countryCode || "in"}/account?mode=register`,
+            message:
+              "Please register or sign in to add items to your cart / ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಲು ದಯವಿಟ್ಟು ನೋಂದಾಯಿಸಿ ಅಥವಾ ಲಾಗಿನ್ ಮಾಡಿ",
+          },
+          { status: 401 }
+        )
+      }
+
       await addToCart({
         variantId: variantId,
         quantity: Number(quantity) || 1,

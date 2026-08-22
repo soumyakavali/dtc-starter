@@ -11,20 +11,31 @@ import React from "react"
 const LocalizedClientLink = ({
   children,
   href,
+  className,
   ...props
 }: {
   children?: React.ReactNode
   href: string
   className?: string
-  onClick?: () => void
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
   passHref?: true
   [x: string]: unknown
 }) => {
   const params = useParams()
   const countryCode = (params?.countryCode as string) || "in"
 
+  // Normalize path so it always has /countryCode prefix without duplicating
+  const normalizedHref = href.startsWith(`/${countryCode}`)
+    ? href
+    : `/${countryCode}${href.startsWith("/") ? href : `/${href}`}`
+
   return (
-    <Link href={`/${countryCode}${href}`} {...props}>
+    <Link
+      href={normalizedHref}
+      prefetch={true}
+      className={className}
+      {...props}
+    >
       {children}
     </Link>
   )

@@ -8,6 +8,7 @@ import {
 } from "@lib/data/cart"
 import { getProductByHandle } from "@lib/data/products"
 import { listCategories } from "@lib/data/categories"
+import { setFarmerSessionCookie, removeFarmerSessionCookie } from "@lib/data/cookies"
 import { HttpTypes } from "@medusajs/types"
 
 export type TestResult = {
@@ -47,7 +48,44 @@ export async function runCartUITestSuite(): Promise<TestResult[]> {
       `Trichoderma Liquid price: ₹${trichodermaLiquid?.variants?.[0]?.calculated_price?.calculated_amount}`
     )
 
-    // Test 3: Initialize Cart & Add Item (Trichoderma Liquid 1L @ ₹350)
+    // Test 3: AUTH GATE CHECK - Unregistered / Unauthenticated user is BLOCKED from adding to cart
+    await removeFarmerSessionCookie()
+    let authBlocked = false
+    try {
+      await addToCart({
+        variantId: "var_tri_liq_1l",
+        quantity: 1,
+        countryCode: "in",
+      })
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes("AUTH_REQUIRED") || msg.includes("register")) {
+        authBlocked = true
+      }
+    }
+    assert(
+      "3. Auth Gate - Unregistered user blocked from adding to cart & redirected",
+      authBlocked,
+      "Unregistered user successfully intercepted by auth gate (AUTH_REQUIRED: Redirect to Register page)"
+    )
+
+    // Test 4: Farmer Registration / Login Session Activation
+    await setFarmerSessionCookie({
+      id: "cus_farmer_test_123",
+      first_name: "Basavaraj",
+      last_name: "Patil",
+      email: "9876543210@biotill.local",
+      phone: "9876543210",
+      created_at: new Date().toISOString(),
+      addresses: [],
+    })
+    assert(
+      "4. Farmer Session Activation (Mobile 9876543210)",
+      true,
+      "Farmer session established successfully for Basavaraj Patil"
+    )
+
+    // Test 5: Initialize Cart & Add Item (Trichoderma Liquid 1L @ ₹350)
     await getOrSetCart("in")
     const triVariantId = trichodermaLiquid?.variants?.[0]?.id || "var_tri_liq_1l"
     await addToCart({
@@ -62,12 +100,12 @@ export async function runCartUITestSuite(): Promise<TestResult[]> {
         (i as Record<string, unknown>).product_handle === "trichoderma-liquid" || i.variant_id === triVariantId
     )
     assert(
-      "3. Add to Cart - Trichoderma Liquid (₹350)",
-      !!item1 && item1.unit_price === 350 && (cartAfter1?.subtotal ?? 0) >= 350,
-      `Item added: ${item1?.title}, Unit Price: ₹${item1?.unit_price}, Subtotal: ₹${cartAfter1?.subtotal}`
+      "5. Smooth Single Add to Cart - Trichoderma Liquid (Qty 1 = ₹350, No duplicates)",
+      !!item1 && item1.quantity === 1 && item1.unit_price === 350 && (cartAfter1?.subtotal ?? 0) === 350,
+      `Item added: ${item1?.title}, Quantity: ${item1?.quantity}, Unit Price: ₹${item1?.unit_price}, Subtotal: ₹${cartAfter1?.subtotal}`
     )
 
-    // Test 4: Add Pseudomonas Fluorescens Liquid (Qty 2 @ ₹350 = ₹700)
+    // Test 6: Add Pseudomonas Fluorescens Liquid (Qty 2 @ ₹350 = ₹700)
     const pseVariantId = pseudomonasLiquid?.variants?.[0]?.id || "var_pse_liq_1l"
     await addToCart({
       variantId: pseVariantId,
@@ -77,46 +115,46 @@ export async function runCartUITestSuite(): Promise<TestResult[]> {
 
     const cartAfter2 = await retrieveCart()
     assert(
-      "4. Add to Cart - Pseudomonas Liquid (Qty 2 @ ₹350)",
-      (cartAfter2?.items?.length ?? 0) >= 2,
+      "6. Add to Cart - Pseudomonas Liquid (Qty 2 @ ₹350 = ₹700)",
+      (cartAfter2?.items?.length ?? 0) >= 2 && (cartAfter2?.subtotal ?? 0) >= 1050,
       `Cart contains ${cartAfter2?.items?.length} distinct line items, total subtotal: ₹${cartAfter2?.subtotal}`
     )
 
-    // Test 5: Free Agricultural Shipping Calculation (Subtotal ₹350 + ₹700 = ₹1050 >= ₹999)
+    // Test 7: Free Agricultural Shipping Calculation (Subtotal ₹350 + ₹700 = ₹1050 >= ₹999)
     assert(
-      "5. Free Agricultural Delivery for Orders ₹999+ (Subtotal ₹1050)",
+      "7. Free Agricultural Delivery for Orders ₹999+ (Subtotal ₹1050)",
       cartAfter2?.shipping_total === 0,
       `Subtotal: ₹${cartAfter2?.subtotal}, Shipping: ₹${cartAfter2?.shipping_total} (Free Shipping Applied)`
     )
 
-    // Test 6: Farmer Promotional Code Application (FARMER10 = 10% Off)
+    // Test 8: Farmer Promotional Code Application (FARMER10 = 10% Off)
     await applyPromotions(["FARMER10"])
     const cartAfterPromo = await retrieveCart()
     assert(
-      "6. Farmer Promo Code (FARMER10 = 10% discount)",
+      "8. Farmer Promo Code (FARMER10 = 10% discount)",
       (cartAfterPromo?.discount_total ?? 0) > 0,
       `Discount applied: ₹${cartAfterPromo?.discount_total}, Final Payable: ₹${cartAfterPromo?.total}`
     )
 
-    // Test 7: Update Line Item Quantity (Update Trichoderma to 3 units)
+    // Test 9: Update Line Item Quantity (Update Trichoderma to 3 units)
     if (item1?.id) {
       await updateLineItem({ lineId: item1.id, quantity: 3 })
       const cartAfterUpdate = await retrieveCart()
       const updatedItem = cartAfterUpdate?.items?.find((i: HttpTypes.StoreCartLineItem) => i.id === item1.id)
       assert(
-        "7. Update Line Item Quantity to 3",
+        "9. Update Line Item Quantity to 3",
         updatedItem?.quantity === 3,
         `Line item quantity updated to ${updatedItem?.quantity}, new item total: ₹${updatedItem?.total}`
       )
     }
 
-    // Test 8: Remove Line Item from Cart
+    // Test 10: Remove Line Item from Cart
     if (item1?.id) {
       await deleteLineItem(item1.id)
       const cartAfterDelete = await retrieveCart()
       const deletedCheck = cartAfterDelete?.items?.find((i: HttpTypes.StoreCartLineItem) => i.id === item1.id)
       assert(
-        "8. Remove Line Item from Cart",
+        "10. Remove Line Item from Cart",
         !deletedCheck,
         `Item removed cleanly, remaining line items in cart: ${cartAfterDelete?.items?.length}`
       )

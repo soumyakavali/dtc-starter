@@ -20,6 +20,7 @@ import { getRegion } from "./regions"
 import { getLocale } from "./locale-actions"
 import { DEFAULT_MOCK_REGION } from "./mock-data"
 import { calculateCartTotals, findProductAndVariant } from "./cart-helpers"
+import { retrieveCustomer } from "./customer"
 
 function safeRevalidate(tag: string) {
   try {
@@ -190,6 +191,12 @@ export async function addToCart({
 }) {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
+  }
+
+  // Farmer registration/authentication gate
+  const customer = await retrieveCustomer().catch(() => null)
+  if (!customer) {
+    throw new Error("AUTH_REQUIRED: Please register or sign in to add items to your cart / ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಲು ದಯವಿಟ್ಟು ನೋಂದಾಯಿಸಿ")
   }
 
   const region = (await getRegion(countryCode)) || DEFAULT_MOCK_REGION

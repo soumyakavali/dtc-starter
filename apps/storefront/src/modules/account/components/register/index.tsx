@@ -1,6 +1,7 @@
 "use client"
 
-import { useActionState, useState } from "react"
+import { useActionState, useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
@@ -12,9 +13,24 @@ type Props = {
 }
 
 const Register = ({ setCurrentView }: Props) => {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectUrl = searchParams.get("redirect")
+
   const [message, formAction] = useActionState(signup, null)
   const [phone, setPhone] = useState("")
   const [username, setUsername] = useState("")
+
+  useEffect(() => {
+    if (message?.state === "success") {
+      if (redirectUrl) {
+        router.push(redirectUrl)
+      } else {
+        router.push("/account")
+      }
+      router.refresh()
+    }
+  }, [message, redirectUrl, router])
 
   return (
     <div

@@ -25,7 +25,7 @@ export default async function ProductPreview({
   return (
     <LocalizedClientLink
       href={`/products/${product.handle}`}
-      className="group flex flex-col h-full bg-white rounded-2xl border border-emerald-100/80 hover:border-emerald-400 hover:shadow-xl transition-all duration-200 p-3 sm:p-4"
+      className="group flex flex-col h-full bg-white rounded-2xl border border-emerald-100/80 hover:border-emerald-400 hover:shadow-xl transition-all duration-200 p-3 sm:p-4 cursor-pointer"
     >
       <div data-testid="product-wrapper" className="flex flex-col h-full">
         <Thumbnail

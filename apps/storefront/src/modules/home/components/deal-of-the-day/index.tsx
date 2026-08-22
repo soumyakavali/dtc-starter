@@ -207,13 +207,32 @@ export default function DealOfTheDay({
   const handleQuickAdd = async (product: ProductItem, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (addingId) return
+
     setAddingId(product.id)
     try {
-      await addToCart({
-        variantId: product.id,
-        quantity: 1,
-        countryCode: "in",
+      const res = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add",
+          variantId: product.id,
+          quantity: 1,
+          countryCode: "in",
+        }),
       })
+
+      const data = await res.json()
+
+      if (data.requireAuth || res.status === 401) {
+        router.push("/in/account?mode=register&redirect=/")
+        return
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || "Failed to add to cart")
+      }
+
       setSuccessId(product.id)
       router.refresh()
       setTimeout(() => {

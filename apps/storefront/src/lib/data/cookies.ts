@@ -240,3 +240,51 @@ export const setLastOrderData = async (order: HttpTypes.StoreOrder | (Record<str
     console.error("Failed to set last order cookie", e)
   }
 }
+
+let memoryFarmerSession: Record<string, unknown> | null = null
+
+export const getFarmerSessionCookie = async (): Promise<Record<string, unknown> | null> => {
+  if (memoryFarmerSession) return memoryFarmerSession
+  try {
+    const cookies = await nextCookies()
+    const raw = cookies.get("_biotill_farmer_session")?.value
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      memoryFarmerSession = parsed
+      return parsed
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+export const setFarmerSessionCookie = async (session: Record<string, unknown>) => {
+  memoryFarmerSession = session
+  try {
+    const cookies = await nextCookies()
+    cookies.set("_biotill_farmer_session", JSON.stringify(session), {
+      maxAge: 60 * 60 * 24 * 30,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    })
+  } catch {
+    // ignore
+  }
+}
+
+export const removeFarmerSessionCookie = async () => {
+  memoryFarmerSession = null
+  try {
+    const cookies = await nextCookies()
+    cookies.set("_biotill_farmer_session", "", {
+      maxAge: -1,
+      path: "/",
+    })
+  } catch {
+    // ignore
+  }
+}
+

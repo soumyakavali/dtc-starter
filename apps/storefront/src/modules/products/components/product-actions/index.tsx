@@ -1,17 +1,15 @@
 "use client"
 
-import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@modules/common/components/ui"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import { isEqual } from "lodash"
-import { useParams, usePathname, useSearchParams } from "next/navigation"
+import { useParams, usePathname, useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
-import { useRouter } from "next/navigation"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -35,10 +33,11 @@ export default function ProductActions({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const countryCode = (useParams().countryCode as string) || "in"
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
-  const countryCode = useParams().countryCode as string
+  const isSubmittingRef = useRef(false)
 
   // If there is only 1 variant, preselect the options
   useEffect(() => {
@@ -72,7 +71,7 @@ export default function ProductActions({
     }))
   }
 
-  //check if the selected options produce a valid variant
+  // check if the selected options produce a valid variant
   const isValidVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) return false
     if (product.variants.length === 1) return true
@@ -97,82 +96,83 @@ export default function ProductActions({
     }
 
     router.replace(pathname + "?" + params.toString())
-  }, [selectedVariant, isValidVariant])
+  }, [selectedVariant, isValidVariant, pathname, router, searchParams])
 
   // check if the selected variant is in stock
   const inStock = useMemo(() => {
     if (!selectedVariant) return true
-    // If we don't manage inventory, we can always add to cart
-    if (!selectedVariant.manage_inventory) {
-      return true
-    }
-
-    // If we allow back orders on the variant, we can add to cart
-    if (selectedVariant.allow_backorder) {
-      return true
-    }
-
-    // If there is inventory available, we can add to cart
-    if ((selectedVariant.inventory_quantity || 0) > 0) {
-      return true
-    }
-
+    if (!selectedVariant.manage_inventory) return true
+    if (selectedVariant.allow_backorder) return true
+    if ((selectedVariant.inventory_quantity || 0) > 0) return true
     return true
   }, [selectedVariant])
 
   const actionsRef = useRef<HTMLDivElement>(null)
-
   const inView = useIntersection(actionsRef, "0px")
 
   const [cartError, setCartError] = useState<string | null>(null)
   const [addedSuccess, setAddedSuccess] = useState(false)
 
-  // add the selected variant to the cart
+  // Add the selected variant to the cart with strict double-click protection & auth redirection
   const handleAddToCart = async () => {
+    // 1. Strict synchronous debounce check
+    if (isSubmittingRef.current || isAdding) {
+      return
+    }
+
     const targetVariantId = selectedVariant?.id || product.variants?.[0]?.id
     if (!targetVariantId) return null
 
+    isSubmittingRef.current = true
     setIsAdding(true)
     setCartError(null)
     setAddedSuccess(false)
 
     try {
-      try {
-        await addToCart({
+      const apiRes = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add",
           variantId: targetVariantId,
           quantity: 1,
           countryCode: countryCode || "in",
-        })
-      } catch (actionErr) {
-        console.warn("Direct server action failed, falling back to /api/cart:", actionErr)
-        const apiRes = await fetch("/api/cart", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "add",
-            variantId: targetVariantId,
-            quantity: 1,
-            countryCode: countryCode || "in",
-          }),
-        })
-        const data = await apiRes.json()
-        if (!data.success) {
-          throw new Error(data.error || "Failed to add item to cart")
-        }
+        }),
+      })
+
+      const data = await apiRes.json()
+
+      // 2. If user is not registered / logged in, redirect directly to Register page
+      if (data.requireAuth || apiRes.status === 401) {
+        const returnUrl = encodeURIComponent(window.location.pathname)
+        router.push(`/${countryCode}/account?mode=register&redirect=${returnUrl}`)
+        return
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || "Failed to add item to cart")
       }
 
       setAddedSuccess(true)
       router.refresh()
-      setTimeout(() => setAddedSuccess(false), 5000)
+      setTimeout(() => setAddedSuccess(false), 4000)
     } catch (err: unknown) {
       console.error("Add to cart failed:", err)
       const message =
         err instanceof Error
           ? err.message
           : "Could not add product to cart. Please try again."
+
+      if (message.includes("AUTH_REQUIRED")) {
+        const returnUrl = encodeURIComponent(window.location.pathname)
+        router.push(`/${countryCode}/account?mode=register&redirect=${returnUrl}`)
+        return
+      }
+
       setCartError(message)
     } finally {
       setIsAdding(false)
+      isSubmittingRef.current = false
     }
   }
 
@@ -213,25 +213,30 @@ export default function ProductActions({
             !isValidVariant
           }
           variant="primary"
-          className="w-full h-10"
+          className="w-full h-11 text-sm font-bold shadow-sm transition-all"
           isLoading={isAdding}
           data-testid="add-product-button"
         >
           {addedSuccess
-            ? "✓ Added to Cart! / ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ"
+            ? "✓ Added to Cart! (1 item) / ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ"
+            : isAdding
+            ? "Adding to Cart... / ಸೇರಿಸಲಾಗುತ್ತಿದೆ..."
             : !selectedVariant && !options
             ? "Select variant"
             : !inStock || !isValidVariant
             ? "Out of stock"
-            : "Add to cart"}
+            : "Add to cart / ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ"}
         </Button>
 
         {addedSuccess && (
-          <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-semibold flex items-center justify-between animate-fadeIn">
-            <span>🌾 Product added to cart! / ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ</span>
+          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-semibold flex items-center justify-between shadow-xs animate-fadeIn">
+            <span className="flex items-center gap-1.5">
+              <span>🌾</span>
+              <span>1 Unit Added to Cart! / ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ</span>
+            </span>
             <a
               href={`/${countryCode}/cart`}
-              className="underline font-bold text-emerald-800 hover:text-emerald-950"
+              className="underline font-extrabold text-emerald-800 hover:text-emerald-950 px-2 py-1 bg-emerald-100 rounded-md"
             >
               View Cart →
             </a>
@@ -239,11 +244,15 @@ export default function ProductActions({
         )}
 
         {cartError && (
-          <div className="p-2.5 rounded-lg bg-red-50 border border-red-300 text-red-800 text-xs">
-            <p className="font-bold">⚠️ Cart Error:</p>
-            <p className="mt-0.5">{cartError}</p>
+          <div className="p-3 rounded-xl bg-red-50 border border-red-300 text-red-800 text-xs shadow-xs">
+            <p className="font-bold flex items-center gap-1">
+              <span>⚠️</span>
+              <span>Cart Notice:</span>
+            </p>
+            <p className="mt-1">{cartError}</p>
           </div>
         )}
+
         <MobileActions
           product={product}
           variant={selectedVariant}
