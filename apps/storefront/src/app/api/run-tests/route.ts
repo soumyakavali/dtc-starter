@@ -1359,13 +1359,43 @@ export async function GET(_req: NextRequest) {
 
   await runTest(
     "Checkout & Delivery",
-    "CHK-03",
-    "Initiate Native UPI Payment Session (Google Pay / PhonePe / Paytm / BHIM)",
-    "ಯುಪಿಐ ಪಾವತಿ ವಿಧಾನ ಸಕ್ರಿಯತೆ (Google Pay, PhonePe, Paytm)",
+    "CHK-03A",
+    "Initiate Native UPI & Google Pay Payment Session (BHIM / GPay / Any UPI App)",
+    "ನೇರ ಯುಪಿಐ ಮತ್ತು ಗೂಗಲ್ ಪೇ ಪಾವತಿ ವಿಧಾನ ಸಕ್ರಿಯತೆ (Zero Processing Fee)",
     async () => {
       const cart = (await retrieveCart()) || (await getOrSetCart("in"))
-      const session = await initiatePaymentSession(cart, { provider_id: "pp_system_default" })
-      if (!session) throw new Error("UPI payment session failed to initialize")
+      const session = await initiatePaymentSession(cart, { provider_id: "pp_upi_gpay" })
+      if (!session || (session.provider_id !== "pp_upi_gpay" && session.status !== "authorized")) {
+        throw new Error("Native UPI payment session failed to initialize")
+      }
+    }
+  )
+
+  await runTest(
+    "Checkout & Delivery",
+    "CHK-03B",
+    "Initiate PhonePe Payment Gateway Session (Instant QR & App Intent)",
+    "ಫೋನ್‌ಪೇ (PhonePe) ಪಾವತಿ ಗೇಟ್‌ವೇ ಮತ್ತು QR ಸ್ಕ್ಯಾನ್ ಸಕ್ರಿಯತೆ",
+    async () => {
+      const cart = (await retrieveCart()) || (await getOrSetCart("in"))
+      const session = await initiatePaymentSession(cart, { provider_id: "pp_upi_phonepe" })
+      if (!session || (session.provider_id !== "pp_upi_phonepe" && session.status !== "authorized")) {
+        throw new Error("PhonePe payment session failed to initialize")
+      }
+    }
+  )
+
+  await runTest(
+    "Checkout & Delivery",
+    "CHK-03C",
+    "Initiate Paytm Payment Gateway Session (Wallet / UPI / Postpaid)",
+    "ಪೇಟಿಎಂ (Paytm) ವಾಲೆಟ್ ಮತ್ತು ಯುಪಿಐ ಪಾವತಿ ಗೇಟ್‌ವೇ ಸಕ್ರಿಯತೆ",
+    async () => {
+      const cart = (await retrieveCart()) || (await getOrSetCart("in"))
+      const session = await initiatePaymentSession(cart, { provider_id: "pp_upi_paytm" })
+      if (!session || (session.provider_id !== "pp_upi_paytm" && session.status !== "authorized")) {
+        throw new Error("Paytm payment session failed to initialize")
+      }
     }
   )
 

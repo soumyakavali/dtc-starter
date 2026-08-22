@@ -12,6 +12,7 @@ import {
   getCacheOptions,
   getCacheTag,
   getCartId,
+  getFarmerSessionCookie,
   getPendingCustomer,
   removeAuthToken,
   removeCartId,
