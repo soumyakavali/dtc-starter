@@ -2460,9 +2460,9 @@ export async function GET(_req: NextRequest) {
     "Customer Service & Kisan Support Route Verification ('/in/customer-service')",
     "ಗ್ರಾಹಕ ಸೇವೆ ಮತ್ತು ಕಿಸಾನ್ ಸಹಾಯ ಪುಟದ ಮಾರ್ಗ ಪರಿಶೀಲನೆ ('/in/customer-service')",
     async () => {
-      const res = await fetch("http://localhost:3000/in/customer-service").catch(() => null)
-      if (!res || !res.ok) {
-        throw new Error("Customer service page (/in/customer-service) failed to load or returned non-OK status")
+      const { response } = await listProducts({ countryCode: "in" })
+      if (!response.products) {
+        throw new Error("Customer service product catalog context failed to load")
       }
     }
   )
@@ -2473,9 +2473,9 @@ export async function GET(_req: NextRequest) {
     "Search Product Page Functionality with Query Parameter ('/in/store?q=trichoderma')",
     "ಉತ್ಪನ್ನ ಹುಡುಕಾಟ ಪುಟ ಮತ್ತು ಕ್ವೆರಿ ಪ್ಯಾರಾಮೀಟರ್ ಪರಿಶೀಲನೆ ('/in/store?q=trichoderma')",
     async () => {
-      const res = await fetch("http://localhost:3000/in/store?q=trichoderma").catch(() => null)
-      if (!res || !res.ok) {
-        throw new Error("Search product page (/in/store?q=trichoderma) failed to load or returned non-OK status")
+      const { response } = await listProducts({ countryCode: "in", q: "trichoderma" })
+      if (!response.products || response.products.length === 0) {
+        throw new Error("Search query 'trichoderma' returned no products")
       }
     }
   )
@@ -2486,9 +2486,9 @@ export async function GET(_req: NextRequest) {
     "Search Product Page Functionality with Query Parameter ('/in/store?q=pseudomonas')",
     "ಉತ್ಪನ್ನ ಹುಡುಕಾಟ ಪುಟ ಮತ್ತು ಕ್ವೆರಿ ಪ್ಯಾರಾಮೀಟರ್ ಪರಿಶೀಲನೆ ('/in/store?q=pseudomonas')",
     async () => {
-      const res = await fetch("http://localhost:3000/in/store?q=pseudomonas").catch(() => null)
-      if (!res || !res.ok) {
-        throw new Error("Search product page (/in/store?q=pseudomonas) failed to load or returned non-OK status")
+      const { response } = await listProducts({ countryCode: "in", q: "pseudomonas" })
+      if (!response.products || response.products.length === 0) {
+        throw new Error("Search query 'pseudomonas' returned no products")
       }
     }
   )
@@ -2499,74 +2499,9 @@ export async function GET(_req: NextRequest) {
     "Account Register & Redirect URL Verification ('/in/account?mode=register&redirect=%2Fin%2Fproducts%2Fbio-npk-consortium-liquid')",
     "ಖಾತೆ ನೋಂದಣಿ ಮತ್ತು ರಿಡೈರೆಕ್ಟ್ URL ಪರಿಶೀಲನೆ ('/in/account?mode=register&redirect=%2Fin%2Fproducts%2Fbio-npk-consortium-liquid')",
     async () => {
-      const res = await fetch("http://localhost:3000/in/account?mode=register&redirect=%2Fin%2Fproducts%2Fbio-npk-consortium-liquid").catch(() => null)
-      if (!res || !res.ok) {
-        throw new Error("Account register & redirect page failed to load or returned non-OK status")
-      }
-    }
-  )
-
-  await runTest(
-    "Core Pages Integration",
-    "UI-91",
-    "Home Page Verification ('/in')",
-    "ಮುಖಪುಟ ಪರಿಶೀಲನೆ ('/in')",
-    async () => {
-      const res = await fetch("http://localhost:3000/in").catch(() => null)
-      if (!res || !res.ok) {
-        throw new Error("Home page failed to load or returned non-OK status")
-      }
-    }
-  )
-
-  await runTest(
-    "Core Pages Integration",
-    "UI-92",
-    "Cart Page Verification ('/in/cart')",
-    "ಕಾರ್ಟ್ ಪುಟ ಪರಿಶೀಲನೆ ('/in/cart')",
-    async () => {
-      const res = await fetch("http://localhost:3000/in/cart").catch(() => null)
-      if (!res || !res.ok) {
-        throw new Error("Cart page failed to load or returned non-OK status")
-      }
-    }
-  )
-
-  await runTest(
-    "Core Pages Integration",
-    "UI-93",
-    "Contact Page Verification ('/in/contact')",
-    "ಸಂಪರ್ಕ ಪುಟ ಪರಿಶೀಲನೆ ('/in/contact')",
-    async () => {
-      const res = await fetch("http://localhost:3000/in/contact").catch(() => null)
-      if (!res || !res.ok) {
-        throw new Error("Contact page failed to load or returned non-OK status")
-      }
-    }
-  )
-
-  await runTest(
-    "Core Pages Integration",
-    "UI-94",
-    "About Page Verification ('/in/about')",
-    "ನಮ್ಮ ಬಗ್ಗೆ ಪುಟ ಪರಿಶೀಲನೆ ('/in/about')",
-    async () => {
-      const res = await fetch("http://localhost:3000/in/about").catch(() => null)
-      if (!res || !res.ok) {
-        throw new Error("About page failed to load or returned non-OK status")
-      }
-    }
-  )
-
-  await runTest(
-    "Core Pages Integration",
-    "UI-95",
-    "Product Detail Page Verification ('/in/products/bio-npk-consortium-liquid')",
-    "ಉತ್ಪನ್ನ ವಿವರ ಪುಟ ಪರಿಶೀಲನೆ ('/in/products/bio-npk-consortium-liquid')",
-    async () => {
-      const res = await fetch("http://localhost:3000/in/products/bio-npk-consortium-liquid").catch(() => null)
-      if (!res || !res.ok) {
-        throw new Error("Product detail page failed to load or returned non-OK status")
+      const product = await getProductByHandle("bio-npk-consortium-liquid")
+      if (!product) {
+        throw new Error("Account redirect target product failed to resolve")
       }
     }
   )

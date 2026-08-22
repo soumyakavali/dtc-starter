@@ -57,9 +57,9 @@ export default async function Image() {
             color: "#a7f3d0",
           }}
         >
-          <span>📦 Powder Formulations (@ ₹150)</span>
+          <span>📦 Powder Formulations (@ Rs. 150)</span>
           <span>•</span>
-          <span>🛢️ Liquid Formulations (@ ₹350)</span>
+          <span>🛢️ Liquid Formulations (@ Rs. 350)</span>
           <span>•</span>
           <span>🌿 100% Bio-Certified</span>
         </div>
