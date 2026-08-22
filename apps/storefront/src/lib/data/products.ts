@@ -10,11 +10,33 @@ type ProductListQueryParams = (HttpTypes.FindParams &
   HttpTypes.StoreProductListParams) & {
   options?: string[]
   option_value_id?: string | string[]
+  q?: string
 }
 
 const getFilteredMockProducts = (queryParams?: ProductListQueryParams) => {
   let list = [...MOCK_PRODUCTS]
   if (!queryParams) return list
+
+  if (queryParams.q) {
+    const q = queryParams.q.toLowerCase()
+    list = list.filter((p) => {
+      const title = (p.title || "").toLowerCase()
+      const handle = (p.handle || "").toLowerCase()
+      const desc = (p.description || "").toLowerCase()
+      const subtitle = (p.subtitle || "").toLowerCase()
+      return (
+        title.includes(q) ||
+        handle.includes(q) ||
+        desc.includes(q) ||
+        subtitle.includes(q) ||
+        (q.includes("trichoderma") && (handle.includes("trichoderma") || title.includes("trichoderma"))) ||
+        (q.includes("pseudomonas") && (handle.includes("pseudomonas") || title.includes("pseudomonas"))) ||
+        (q.includes("metarhizium") && (handle.includes("metarhizium") || title.includes("metarhizium"))) ||
+        (q.includes("vam") && (handle.includes("vam") || title.includes("vam"))) ||
+        (q.includes("npk") && (handle.includes("npk") || title.includes("npk")))
+      )
+    })
+  }
 
   if (queryParams.handle) {
     const targetHandle = queryParams.handle.toLowerCase()

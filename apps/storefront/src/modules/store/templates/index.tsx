@@ -12,14 +12,17 @@ const StoreTemplate = ({
   page,
   countryCode,
   optionValueIds,
+  searchQuery,
 }: {
   sortBy?: SortOptions
   page?: string
   countryCode: string
   optionValueIds?: OptionValueIds
+  searchQuery?: string | string[]
 }) => {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
+  const qStr = typeof searchQuery === "string" ? searchQuery : searchQuery?.[0]
 
   return (
     <div
@@ -28,8 +31,15 @@ const StoreTemplate = ({
     >
       <RefinementList sortBy={sort} hideSortBy={true} />
       <div className="w-full">
-        <div className="mb-8 text-2xl-semi">
-          <h1 data-testid="store-page-title">All products</h1>
+        <div className="mb-8 text-2xl-semi flex items-center justify-between">
+          <h1 data-testid="store-page-title">
+            {qStr ? `Search Results for "${qStr}"` : "All products"}
+          </h1>
+          {qStr && (
+            <span className="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium">
+              Keyword: {qStr}
+            </span>
+          )}
         </div>
         <Suspense fallback={<SkeletonProductGrid />}>
           <PaginatedProducts
@@ -37,6 +47,7 @@ const StoreTemplate = ({
             page={pageNumber}
             countryCode={countryCode}
             optionValueIds={optionValueIds}
+            searchQuery={qStr}
           />
         </Suspense>
       </div>

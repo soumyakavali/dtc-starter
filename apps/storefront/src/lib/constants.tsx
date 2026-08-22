@@ -75,6 +75,10 @@ export const isCodAgri = (providerId?: string) => {
   return providerId?.startsWith("pp_cod_agri") || providerId?.includes("cod")
 }
 
+export const isKisanCredit = (providerId?: string) => {
+  return providerId?.includes("kisan") || providerId?.includes("credit") || providerId?.includes("agri_credit")
+}
+
 export const isManual = (providerId?: string) => {
   return (
     isCodAgri(providerId) ||
