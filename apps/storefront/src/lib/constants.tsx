@@ -3,7 +3,7 @@ import PaytmIcon from "@modules/common/icons/paytm"
 import UpiIcon from "@modules/common/icons/upi"
 import React from "react"
 
-/* Map of payment provider_id to their title and icon (Only 3 payment modes: BHIM UPI, Paytm, PhonePe) */
+/* Map of payment provider_id to their title and icon (Only UPI, COD, PhonePe, Paytm) */
 export const paymentInfoMap: Record<
   string,
   { title: string; icon: React.JSX.Element; description?: string }
@@ -60,17 +60,8 @@ export const isUpi = (providerId?: string) => {
   )
 }
 
-export const isCodAgri = (providerId?: string) => {
-  return providerId?.startsWith("pp_cod_agri") || providerId?.includes("cod")
-}
-
-export const isKisanCredit = (providerId?: string) => {
-  return providerId?.includes("kisan") || providerId?.includes("credit") || providerId?.includes("agri_credit")
-}
-
 export const isManual = (providerId?: string) => {
   return (
-    isCodAgri(providerId) ||
     isPhonePe(providerId) ||
     isPaytm(providerId) ||
     isUpi(providerId)

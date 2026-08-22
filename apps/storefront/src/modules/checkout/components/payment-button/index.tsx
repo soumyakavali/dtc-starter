@@ -1,6 +1,6 @@
 "use client"
 
-import { isManual, isStripeLike, isPhonePe, isPaytm, isUpi, isKisanCredit, isCodAgri } from "@lib/constants"
+import { isManual, isStripeLike, isPhonePe, isPaytm, isUpi } from "@lib/constants"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@modules/common/components/ui"
@@ -397,7 +397,7 @@ const ManualTestPaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const paymentSession = cart?.payment_collection?.payment_sessions?.[0]
-  const providerId = paymentSession?.provider_id
+  const _providerId = paymentSession?.provider_id
 
   const onPaymentCompleted = async () => {
     await placeOrder()
@@ -417,11 +417,7 @@ const ManualTestPaymentButton = ({
     onPaymentCompleted()
   }
 
-  const label = isKisanCredit(providerId)
-    ? `Confirm Order with Kisan Credit Card (₹${cart.total?.toLocaleString() || "0"})`
-    : isCodAgri(providerId)
-    ? `Place Farm Order (Cash / UPI on Delivery - ₹${cart.total?.toLocaleString() || "0"})`
-    : `Place Order (₹${cart.total?.toLocaleString() || "0"})`
+  const label = `Place Order (₹${cart.total?.toLocaleString() || "0"})`
 
   return (
     <>

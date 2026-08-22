@@ -40,10 +40,12 @@ export const listCartPaymentMethods = async (regionId: string) => {
       }
     )
     .then(({ payment_providers }) => {
-      if (!payment_providers || payment_providers.length === 0) {
-        return AGRI_PAYMENT_PROVIDERS
-      }
-      return payment_providers.sort((a, b) => {
+      const allowedIds = ["pp_upi_phonepe", "pp_upi_paytm", "pp_upi_gpay"]
+      const providers = payment_providers && payment_providers.length > 0
+        ? payment_providers.filter((p) => allowedIds.includes(p.id))
+        : AGRI_PAYMENT_PROVIDERS
+      
+      return (providers.length > 0 ? providers : AGRI_PAYMENT_PROVIDERS).sort((a, b) => {
         return a.id > b.id ? 1 : -1
       })
     })

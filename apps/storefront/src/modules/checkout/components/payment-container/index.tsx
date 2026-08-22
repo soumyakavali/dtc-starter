@@ -1,10 +1,9 @@
 import { Radio as RadioGroupOption } from "@headlessui/react"
 import { Text, clx } from "@modules/common/components/ui"
-import React, { useContext, useMemo, useState, useEffect, type JSX } from "react"
-import QRCode from "qrcode"
+import React, { useContext, useMemo, useState, type JSX } from "react"
 
 import Radio from "@modules/common/components/radio"
-import { isPhonePe, isPaytm, isUpi, isKisanCredit, isCodAgri } from "@lib/constants"
+import { isPhonePe, isPaytm, isUpi } from "@lib/constants"
 import SkeletonCardDetails from "@modules/skeletons/components/skeleton-card-details"
 import { CardElement } from "@stripe/react-stripe-js"
 import { StripeCardElementOptions } from "@stripe/stripe-js"
@@ -27,16 +26,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
 }) => {
   const isSelected = selectedPaymentOptionId === paymentProviderId
   const [upiId, setUpiId] = useState("")
-  const [kccNumber, setKccNumber] = useState("")
   const [activeTab, setActiveTab] = useState<"qr" | "vpa">("qr")
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>("")
-
-  useEffect(() => {
-    const upiPayload = `upi://pay?pa=biotill@ybl&pn=BioTill%20Agri&cu=INR`
-    QRCode.toDataURL(upiPayload, { width: 96, margin: 1, color: { dark: "#064e3b", light: "#ffffff" } })
-      .then((url) => setQrCodeUrl(url))
-      .catch(() => {})
-  }, [])
 
   const info = paymentInfoMap[paymentProviderId]
 
@@ -71,16 +61,6 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
               {isPaytm(paymentProviderId) && (
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-sky-100 text-sky-700 rounded-full">
                   Wallet / UPI
-                </span>
-              )}
-              {isKisanCredit(paymentProviderId) && (
-                <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-800 rounded-full">
-                  0% Surcharge
-                </span>
-              )}
-              {isCodAgri(paymentProviderId) && (
-                <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-100 text-amber-800 rounded-full">
-                  Pay at Farm
                 </span>
               )}
             </div>
@@ -133,13 +113,30 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
           {activeTab === "qr" ? (
             <div className="flex flex-col sm:flex-row items-center gap-4 bg-emerald-50/80 p-3 rounded-md border border-emerald-100">
               <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-xs flex flex-col items-center">
-                {qrCodeUrl ? (
-                  <img src={qrCodeUrl} alt="UPI QR Code" width={96} height={96} className="rounded-md" />
-                ) : (
-                  <div className="w-24 h-24 bg-emerald-50 animate-pulse flex items-center justify-center text-[10px] text-emerald-800">
-                    Generating QR...
-                  </div>
-                )}
+                {/* Visual SVG QR Representation */}
+                <svg width="96" height="96" viewBox="0 0 96 96" className="text-emerald-900">
+                  <rect width="96" height="96" fill="white" />
+                  {/* Outer corners */}
+                  <rect x="8" y="8" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="4" rx="2" />
+                  <rect x="14" y="14" width="12" height="12" fill="currentColor" />
+                  <rect x="64" y="8" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="4" rx="2" />
+                  <rect x="70" y="14" width="12" height="12" fill="currentColor" />
+                  <rect x="8" y="64" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="4" rx="2" />
+                  <rect x="14" y="70" width="12" height="12" fill="currentColor" />
+                  {/* Data modules pattern */}
+                  <rect x="40" y="12" width="6" height="6" fill="currentColor" />
+                  <rect x="50" y="12" width="6" height="6" fill="currentColor" />
+                  <rect x="44" y="24" width="6" height="6" fill="currentColor" />
+                  <rect x="12" y="42" width="6" height="6" fill="currentColor" />
+                  <rect x="24" y="42" width="6" height="6" fill="currentColor" />
+                  <rect x="40" y="40" width="16" height="16" fill="#047857" rx="2" />
+                  <rect x="64" y="42" width="6" height="6" fill="currentColor" />
+                  <rect x="76" y="42" width="6" height="6" fill="currentColor" />
+                  <rect x="44" y="64" width="6" height="6" fill="currentColor" />
+                  <rect x="54" y="74" width="6" height="6" fill="currentColor" />
+                  <rect x="68" y="68" width="8" height="8" fill="currentColor" />
+                  <rect x="80" y="80" width="6" height="6" fill="currentColor" />
+                </svg>
                 <span className="text-[10px] text-emerald-800 font-semibold mt-1">BHIM UPI QR</span>
               </div>
               <div className="flex-1 text-left">
@@ -183,35 +180,6 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
               </p>
             </div>
           )}
-        </div>
-      )}
-
-      {isSelected && isKisanCredit(paymentProviderId) && (
-        <div className="mt-2 pt-3 border-t border-emerald-200/60 text-xs text-gray-700 bg-emerald-50/70 p-3 rounded-lg" onClick={(e) => e.stopPropagation()}>
-          <p className="font-semibold text-emerald-900 mb-1">Kisan Credit Card (KCC) Verification</p>
-          <div className="flex gap-2 mt-1">
-            <input
-              type="text"
-              placeholder="Enter 16-digit KCC Number or Farmer Registration ID"
-              value={kccNumber}
-              onChange={(e) => setKccNumber(e.target.value)}
-              className="flex-1 px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-600 bg-white"
-            />
-          </div>
-          <p className="text-[10px] text-gray-500 mt-1">
-            Applicable for NABARD/SBI/PNB/HDFC Agri crop season loans with zero transaction fee.
-          </p>
-        </div>
-      )}
-
-      {isSelected && isCodAgri(paymentProviderId) && (
-        <div className="mt-2 pt-3 border-t border-amber-200/60 text-xs text-amber-900 bg-amber-50/80 p-3 rounded-lg">
-          <p className="font-semibold flex items-center gap-1.5">
-            🌾 Farmer Assurance Guarantee:
-          </p>
-          <p className="text-[11px] text-amber-800 mt-0.5">
-            Inspect the sealed seed bags & lab certification QR tag upon arrival at your farm before giving cash or paying via PhonePe/Paytm QR to the delivery agent.
-          </p>
         </div>
       )}
 
