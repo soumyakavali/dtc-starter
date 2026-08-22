@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useTransition } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { usePathname } from "next/navigation"
+import { usePathname, useParams } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
+import { signout } from "@lib/data/customer"
 
 interface LeftNavPanelProps {
   customer?: HttpTypes.StoreCustomer | null
@@ -65,6 +66,19 @@ export default function LeftNavPanel({ customer }: LeftNavPanelProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isProductsExpanded, setIsProductsExpanded] = useState(true)
   const pathname = usePathname()
+  const { countryCode } = (useParams() as { countryCode?: string }) || { countryCode: "in" }
+  const [isPending, startTransition] = useTransition()
+
+  const handleLogout = async () => {
+    setIsOpen(false)
+    startTransition(async () => {
+      try {
+        await signout(countryCode || "in")
+      } catch {
+        window.location.href = `/${countryCode || "in"}/account`
+      }
+    })
+  }
 
   // Close panel on route changes
   useEffect(() => {
@@ -382,13 +396,24 @@ export default function LeftNavPanel({ customer }: LeftNavPanelProps) {
 
           <div className="pt-2 border-t border-gray-200/60 flex items-center justify-between text-xs font-semibold">
             {customer ? (
-              <LocalizedClientLink
-                href="/account"
-                onClick={() => setIsOpen(false)}
-                className="text-gray-700 hover:text-emerald-800"
-              >
-                My Account
-              </LocalizedClientLink>
+              <div className="flex items-center gap-3">
+                <LocalizedClientLink
+                  href="/account"
+                  onClick={() => setIsOpen(false)}
+                  className="text-gray-800 font-bold hover:text-emerald-800 flex items-center gap-1"
+                >
+                  <span>🌾</span> My Account
+                </LocalizedClientLink>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={handleLogout}
+                  className="text-red-600 hover:text-red-800 font-medium hover:underline text-[11px] disabled:opacity-50"
+                  data-testid="left-nav-logout-button"
+                >
+                  {isPending ? "..." : "Log out"}
+                </button>
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <LocalizedClientLink

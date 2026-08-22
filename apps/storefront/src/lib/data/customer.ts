@@ -7,7 +7,6 @@ import { FetchError } from "@medusajs/js-sdk"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { cookies as nextCookies } from "next/headers"
-import { DEMO_FARMER_ACCOUNT } from "./mock-data"
 import {
   getAuthHeaders,
   getCacheOptions,
@@ -17,10 +16,14 @@ import {
   getPendingCustomer,
   removeAuthToken,
   removeCartId,
+  removeFarmerSessionCookie,
+  removeLocalCartData,
   removePendingCustomer,
   setAuthToken,
+  setFarmerSessionCookie,
   setPendingCustomer,
 } from "./cookies"
+import { DEMO_FARMER_ACCOUNT } from "./mock-data"
 
 export type CustomerAuthState =
   | { state: "error"; error: string }
@@ -226,7 +229,6 @@ async function completeLogin(
     email?: string
   }
 ): Promise<CustomerAuthState> {
-  // Check for Demo Farmer Account test credentials
   const cleanEmail = email.toLowerCase().trim()
   const cleanPhone = (fallbackCustomerInfo?.phone || "").replace(/[^0-9]/g, "")
   const isDemoAccount =
@@ -271,14 +273,7 @@ async function completeLogin(
             ],
           }
 
-      const cookies = await nextCookies()
-      cookies.set("_biotill_farmer_session", JSON.stringify(sessionData), {
-        maxAge: 60 * 60 * 24 * 30,
-        httpOnly: true,
-        sameSite: "strict",
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-      })
+      await setFarmerSessionCookie(sessionData)
       return { state: "success" }
     } catch {
       return { state: "error", error: "Invalid login credentials. Please check your mobile number / password." }
@@ -303,25 +298,21 @@ async function completeLogin(
   if (typeof result !== "string") {
     // Store fallback farmer session
     try {
-      const cookies = await nextCookies()
-      cookies.set(
-        "_biotill_farmer_session",
-        JSON.stringify({
-          id: `cus_farmer_${Date.now()}`,
-          first_name: fallbackCustomerInfo?.first_name || "BioTill Farmer",
-          last_name: fallbackCustomerInfo?.last_name || "",
-          email,
-          phone: fallbackCustomerInfo?.phone || "",
-          created_at: new Date().toISOString(),
-          addresses: [],
-        }),
-        {
-          maxAge: 60 * 60 * 24 * 30,
-          httpOnly: true,
-          sameSite: "strict",
-          secure: process.env.NODE_ENV === "production",
-        }
-      )
+      const sessionData = isDemoAccount
+        ? {
+            ...DEMO_FARMER_ACCOUNT,
+            created_at: new Date().toISOString(),
+          }
+        : {
+            id: `cus_farmer_${Date.now()}`,
+            first_name: fallbackCustomerInfo?.first_name || "BioTill Farmer",
+            last_name: fallbackCustomerInfo?.last_name || "",
+            email,
+            phone: fallbackCustomerInfo?.phone || "",
+            created_at: new Date().toISOString(),
+            addresses: [],
+          }
+      await setFarmerSessionCookie(sessionData)
       return { state: "success" }
     } catch {
       return {
@@ -367,7 +358,9 @@ async function completeLogin(
   await setAuthToken(token)
 
   const customerCacheTag = await getCacheTag("customers")
-  revalidateTag(customerCacheTag)
+  if (customerCacheTag) {
+    revalidateTag(customerCacheTag)
+  }
 
   try {
     await transferCart()
@@ -393,7 +386,7 @@ export async function confirmEmailVerification(
   }
 }
 
-export async function signout(countryCode: string) {
+export async function clearAllSessions() {
   try {
     await sdk.auth.logout()
   } catch {
@@ -401,22 +394,25 @@ export async function signout(countryCode: string) {
   }
 
   await removeAuthToken()
-
-  try {
-    const cookies = await nextCookies()
-    cookies.set("_biotill_farmer_session", "", { maxAge: -1 })
-  } catch {
-    // ignore
-  }
+  await removeFarmerSessionCookie()
+  await removePendingCustomer()
 
   const customerCacheTag = await getCacheTag("customers")
-  revalidateTag(customerCacheTag)
+  if (customerCacheTag) {
+    revalidateTag(customerCacheTag)
+  }
 
   await removeCartId()
+  await removeLocalCartData()
 
   const cartCacheTag = await getCacheTag("carts")
-  revalidateTag(cartCacheTag)
+  if (cartCacheTag) {
+    revalidateTag(cartCacheTag)
+  }
+}
 
+export async function signout(countryCode: string) {
+  await clearAllSessions()
   redirect(`/${countryCode}/account`)
 }
 

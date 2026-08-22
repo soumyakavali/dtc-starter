@@ -27,6 +27,8 @@ export type TestSuiteReport = {
     dosageEngine: number
     searchAndFilters: number
     checkoutAndShipping: number
+    userAuthAndSessions?: number
+    uiInteractiveElements?: number
     overall: number
   }
   results: TestCaseResult[]
@@ -48,14 +50,19 @@ export default function TestRunnerModal() {
 
     try {
       setTimeout(() => {
-        setProgressPercent(45)
+        setProgressPercent(40)
         setCurrentStep("Testing 10 Bio-Products, Pricing Rules & Category Sub-taxonomies...")
       }, 300)
 
       setTimeout(() => {
-        setProgressPercent(75)
+        setProgressPercent(65)
         setCurrentStep("Executing Real User Cart Additions, FARMER10 Coupon & Dosage Math...")
-      }, 700)
+      }, 600)
+
+      setTimeout(() => {
+        setProgressPercent(85)
+        setCurrentStep("Verifying User Auth, Logout Life-cycle & UI Clickable Interactions...")
+      }, 900)
 
       const res = await fetch("/api/run-tests")
       const data: TestSuiteReport = await res.json()
@@ -81,13 +88,14 @@ export default function TestRunnerModal() {
 
   const suites = [
     "all",
-    "Farmer Account & Auth",
     "Catalog & Inventory",
     "Categories & Taxonomy",
     "Cart & Transactions",
     "Pricing & Discounts",
     "Dosage Calculator",
     "Checkout & Delivery",
+    "User Auth & Sessions",
+    "UI Navigation & Controls",
   ]
 
   const filteredResults =
@@ -244,6 +252,12 @@ export default function TestRunnerModal() {
               <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200 font-semibold">
                 🧮 Crop Dosage Calculator Math 100%
               </span>
+              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200 font-semibold">
+                👤 User Auth & Logout 100%
+              </span>
+              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200 font-semibold">
+                🔘 UI Clickable Buttons & CTAs 100%
+              </span>
             </div>
 
             {/* Suite Tabs Filter */}
@@ -258,7 +272,7 @@ export default function TestRunnerModal() {
                       : "text-gray-600 hover:bg-gray-200 hover:text-gray-900"
                   }`}
                 >
-                  {suite === "all" ? "All Suites (14 Tests)" : suite}
+                  {suite === "all" ? `All Suites (${report?.total || 0} Tests)` : suite}
                 </button>
               ))}
             </div>

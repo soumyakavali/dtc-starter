@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useTransition } from "react"
 import { ArrowRightOnRectangle } from "@medusajs/icons"
 import { clx } from "@modules/common/components/ui"
 import { useParams, usePathname } from "next/navigation"
@@ -19,9 +20,19 @@ const AccountNav = ({
 }) => {
   const route = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
+  const [isPending, startTransition] = useTransition()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const handleLogout = async () => {
-    await signout(countryCode)
+    setIsLoggingOut(true)
+    startTransition(async () => {
+      try {
+        await signout(countryCode)
+      } catch {
+        // Fallback for client navigation
+        window.location.href = `/${countryCode}/account`
+      }
+    })
   }
 
   return (
@@ -30,31 +41,34 @@ const AccountNav = ({
         {route !== `/${countryCode}/account` ? (
           <LocalizedClientLink
             href="/account"
-            className="flex items-center gap-x-2 text-small-regular py-2"
+            className="flex items-center gap-x-2 text-small-regular py-2 text-emerald-800 font-semibold"
             data-testid="account-main-link"
           >
             <>
               <ChevronDown className="transform rotate-90" />
-              <span>Account</span>
+              <span>← Back to Account / ಖಾತೆಗೆ ಹಿಂತಿರುಗಿ</span>
             </>
           </LocalizedClientLink>
         ) : (
           <>
-            <div className="text-xl-semi mb-4 px-8">
-              Hello {customer?.first_name}
+            <div className="text-xl-semi mb-4 px-8 flex items-center justify-between">
+              <div>
+                <span>Hello {customer?.first_name}</span>
+                <span className="block text-xs text-gray-500 font-normal">ರೈತ ಪ್ರೊಫೈಲ್</span>
+              </div>
             </div>
             <div className="text-base-regular">
               <ul>
                 <li>
                   <LocalizedClientLink
                     href="/account/profile"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8 hover:bg-emerald-50/50 transition-colors"
                     data-testid="profile-link"
                   >
                     <>
                       <div className="flex items-center gap-x-2">
                         <User size={20} />
-                        <span>Profile</span>
+                        <span>Profile & Farm Info</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -63,13 +77,13 @@ const AccountNav = ({
                 <li>
                   <LocalizedClientLink
                     href="/account/addresses"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8 hover:bg-emerald-50/50 transition-colors"
                     data-testid="addresses-link"
                   >
                     <>
                       <div className="flex items-center gap-x-2">
                         <MapPin size={20} />
-                        <span>Addresses</span>
+                        <span>Delivery Addresses / ವಿಳಾಸ</span>
                       </div>
                       <ChevronDown className="transform -rotate-90" />
                     </>
@@ -78,12 +92,12 @@ const AccountNav = ({
                 <li>
                   <LocalizedClientLink
                     href="/account/orders"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8 hover:bg-emerald-50/50 transition-colors"
                     data-testid="orders-link"
                   >
                     <div className="flex items-center gap-x-2">
                       <Package size={20} />
-                      <span>Orders</span>
+                      <span>Orders & Dispatches / ಆರ್ಡರ್‌ಗಳು</span>
                     </div>
                     <ChevronDown className="transform -rotate-90" />
                   </LocalizedClientLink>
@@ -91,13 +105,14 @@ const AccountNav = ({
                 <li>
                   <button
                     type="button"
-                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8 w-full"
+                    disabled={isLoggingOut || isPending}
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8 w-full text-red-600 hover:bg-red-50/60 transition-colors disabled:opacity-50"
                     onClick={handleLogout}
                     data-testid="logout-button"
                   >
                     <div className="flex items-center gap-x-2">
                       <ArrowRightOnRectangle />
-                      <span>Log out</span>
+                      <span>{isLoggingOut || isPending ? "Signing out..." : "Log out / ಲಾಗ್‌ಔಟ್"}</span>
                     </div>
                     <ChevronDown className="transform -rotate-90" />
                   </button>
@@ -110,7 +125,7 @@ const AccountNav = ({
       <div className="hidden small:block" data-testid="account-nav">
         <div>
           <div className="pb-4">
-            <h3 className="text-base-semi">Account</h3>
+            <h3 className="text-base-semi text-gray-900">Farmer Account / ಕೃಷಿ ಖಾತೆ</h3>
           </div>
           <div className="text-base-regular">
             <ul className="flex mb-0 justify-start items-start flex-col gap-y-4">
@@ -129,7 +144,7 @@ const AccountNav = ({
                   route={route!}
                   data-testid="profile-link"
                 >
-                  Profile
+                  Profile & Farm
                 </AccountNavLink>
               </li>
               <li>
@@ -150,13 +165,16 @@ const AccountNav = ({
                   Orders
                 </AccountNavLink>
               </li>
-              <li className="text-grey-700">
+              <li className="text-grey-700 w-full pt-2 border-t border-gray-100">
                 <button
                   type="button"
+                  disabled={isLoggingOut || isPending}
                   onClick={handleLogout}
                   data-testid="logout-button"
+                  className="flex items-center gap-2 text-sm text-red-600 hover:text-red-800 hover:underline font-medium cursor-pointer transition-colors disabled:opacity-50"
                 >
-                  Log out
+                  <ArrowRightOnRectangle className="w-4 h-4" />
+                  <span>{isLoggingOut || isPending ? "Signing out..." : "Log out"}</span>
                 </button>
               </li>
             </ul>

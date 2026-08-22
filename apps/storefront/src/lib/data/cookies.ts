@@ -61,10 +61,16 @@ export const setAuthToken = async (token: string) => {
 }
 
 export const removeAuthToken = async () => {
-  const cookies = await nextCookies()
-  cookies.set("_medusa_jwt", "", {
-    maxAge: -1,
-  })
+  try {
+    const cookies = await nextCookies()
+    cookies.delete("_medusa_jwt")
+    cookies.set("_medusa_jwt", "", {
+      maxAge: -1,
+      path: "/",
+    })
+  } catch {
+    // ignore
+  }
 }
 
 export type PendingCustomer = {
@@ -79,24 +85,29 @@ export type PendingCustomer = {
 // extra signup fields in a cookie so they survive the customer leaving to open
 // their inbox, and read them back when creating the customer at login.
 export const setPendingCustomer = async (customer: PendingCustomer) => {
-  const cookies = await nextCookies()
-  cookies.set("_medusa_pending_customer", JSON.stringify(customer), {
-    maxAge: 60 * 60 * 24,
-    httpOnly: true,
-    sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
-  })
+  try {
+    const cookies = await nextCookies()
+    cookies.set("_medusa_pending_customer", JSON.stringify(customer), {
+      maxAge: 60 * 60 * 24,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    })
+  } catch {
+    // ignore
+  }
 }
 
 export const getPendingCustomer = async (): Promise<PendingCustomer | null> => {
-  const cookies = await nextCookies()
-  const value = cookies.get("_medusa_pending_customer")?.value
-
-  if (!value) {
-    return null
-  }
-
   try {
+    const cookies = await nextCookies()
+    const value = cookies.get("_medusa_pending_customer")?.value
+
+    if (!value) {
+      return null
+    }
+
     return JSON.parse(value) as PendingCustomer
   } catch {
     return null
@@ -104,10 +115,16 @@ export const getPendingCustomer = async (): Promise<PendingCustomer | null> => {
 }
 
 export const removePendingCustomer = async () => {
-  const cookies = await nextCookies()
-  cookies.set("_medusa_pending_customer", "", {
-    maxAge: -1,
-  })
+  try {
+    const cookies = await nextCookies()
+    cookies.delete("_medusa_pending_customer")
+    cookies.set("_medusa_pending_customer", "", {
+      maxAge: -1,
+      path: "/",
+    })
+  } catch {
+    // ignore
+  }
 }
 
 let memoryCartId: string | null = null
