@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import Register from "@modules/account/components/register"
 import Login from "@modules/account/components/login"
 
@@ -12,6 +12,8 @@ export enum LOGIN_VIEW {
 
 const LoginTemplate = () => {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
   const mode = searchParams.get("mode")
   const hasRedirect = searchParams.get("redirect")
 
@@ -22,8 +24,22 @@ const LoginTemplate = () => {
   useEffect(() => {
     if (mode === "register") {
       setCurrentView(LOGIN_VIEW.REGISTER)
+    } else {
+      setCurrentView(LOGIN_VIEW.SIGN_IN)
     }
   }, [mode])
+
+  const handleViewChange = (view: LOGIN_VIEW) => {
+    setCurrentView(view)
+    const params = new URLSearchParams(searchParams.toString())
+    if (view === LOGIN_VIEW.REGISTER) {
+      params.set("mode", "register")
+    } else {
+      params.delete("mode")
+    }
+    const newQuery = params.toString() ? `?${params.toString()}` : ""
+    router.replace(`${pathname}${newQuery}`, { scroll: false })
+  }
 
   return (
     <div className="w-full flex flex-col items-center justify-center px-4 py-8 max-w-xl mx-auto">
@@ -48,7 +64,7 @@ const LoginTemplate = () => {
       {/* Switcher Tabs */}
       <div className="flex items-center bg-gray-100 p-1.5 rounded-2xl mb-6 w-full max-w-md border border-gray-200 shadow-inner">
         <button
-          onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
+          onClick={() => handleViewChange(LOGIN_VIEW.SIGN_IN)}
           className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
             currentView === LOGIN_VIEW.SIGN_IN
               ? "bg-white text-emerald-900 shadow-sm border border-gray-200/60"
@@ -60,7 +76,7 @@ const LoginTemplate = () => {
           <span>Sign In / ಲಾಗಿನ್</span>
         </button>
         <button
-          onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
+          onClick={() => handleViewChange(LOGIN_VIEW.REGISTER)}
           className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
             currentView === LOGIN_VIEW.REGISTER
               ? "bg-emerald-700 text-white shadow-md"
@@ -74,9 +90,9 @@ const LoginTemplate = () => {
       </div>
 
       {currentView === LOGIN_VIEW.SIGN_IN ? (
-        <Login setCurrentView={(view) => setCurrentView(view)} />
+        <Login setCurrentView={(view) => handleViewChange(view)} />
       ) : (
-        <Register setCurrentView={(view) => setCurrentView(view)} />
+        <Register setCurrentView={(view) => handleViewChange(view)} />
       )}
     </div>
   )

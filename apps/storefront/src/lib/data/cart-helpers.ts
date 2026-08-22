@@ -172,6 +172,7 @@ export function calculateCartTotals(cart: Partial<HttpTypes.StoreCart> & Record<
   } else if (promoCodes.length > 0) {
     discount_total = Math.round(subtotal * 0.05)
   }
+  const discount_subtotal = discount_total
 
   const promotions = promoCodes.map((code) => ({
     id: `promo_${code.toLowerCase()}`,
@@ -197,8 +198,11 @@ export function calculateCartTotals(cart: Partial<HttpTypes.StoreCart> & Record<
     promotions,
     promo_codes: promoCodes,
     subtotal,
+    item_subtotal: subtotal,
     discount_total,
+    discount_subtotal,
     shipping_total,
+    shipping_subtotal: shipping_total,
     tax_total: 0,
     total,
     shipping_methods:

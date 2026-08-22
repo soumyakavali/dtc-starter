@@ -4,7 +4,7 @@ import { login } from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
-import { useActionState, useState, useEffect } from "react"
+import { useActionState, useState, useEffect, startTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 type Props = {
@@ -71,7 +71,9 @@ const Login = ({ setCurrentView }: Props) => {
               const formData = new FormData()
               formData.append("email", "9845012345")
               formData.append("password", "farmer123")
-              formAction(formData)
+              startTransition(() => {
+                formAction(formData)
+              })
             }}
             className="flex-1 py-1.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg transition text-center shadow-xs cursor-pointer"
             data-testid="quick-demo-login-btn"

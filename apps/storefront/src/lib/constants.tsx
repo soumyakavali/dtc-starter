@@ -13,30 +13,70 @@ export const paymentInfoMap: Record<
   string,
   { title: string; icon: React.JSX.Element; description?: string }
 > = {
+  phonepe: {
+    title: "PhonePe (UPI / QR / Wallet)",
+    icon: <PhonePeIcon size={24} />,
+    description: "Instant payment via PhonePe UPI app or QR scan",
+  },
   pp_upi_phonepe: {
     title: "PhonePe (UPI / QR / Wallet)",
     icon: <PhonePeIcon size={24} />,
     description: "Instant payment via PhonePe UPI app or QR scan",
+  },
+  paytm: {
+    title: "Paytm (UPI / Wallet / Postpaid)",
+    icon: <PaytmIcon size={24} />,
+    description: "Fast checkout using Paytm Wallet, UPI or Postpaid",
   },
   pp_upi_paytm: {
     title: "Paytm (UPI / Wallet / Postpaid)",
     icon: <PaytmIcon size={24} />,
     description: "Fast checkout using Paytm Wallet, UPI or Postpaid",
   },
+  upi: {
+    title: "Google Pay & BHIM UPI",
+    icon: <UpiIcon size={24} />,
+    description: "Pay using any UPI App (GPay, BHIM, Cred, Amazon Pay)",
+  },
   pp_upi_gpay: {
     title: "Google Pay & BHIM UPI",
     icon: <UpiIcon size={24} />,
     description: "Pay using any UPI App (GPay, BHIM, Cred, Amazon Pay)",
+  },
+  kisan_credit: {
+    title: "Kisan Credit Card (KCC) / Agri NetBanking",
+    icon: <LeafIcon size={22} className="text-emerald-700" />,
+    description: "Special seasonal credit & zero-surcharge agri banking",
   },
   pp_kisan_credit: {
     title: "Kisan Credit Card (KCC) / Agri NetBanking",
     icon: <LeafIcon size={22} className="text-emerald-700" />,
     description: "Special seasonal credit & zero-surcharge agri banking",
   },
+  cod: {
+    title: "Cash on Delivery (Kisan Pay on Delivery)",
+    icon: <CreditCard />,
+    description: "Pay cash after physical delivery & inspection at your farm",
+  },
   pp_cod_agri: {
     title: "Cash on Delivery (Kisan Pay on Delivery)",
     icon: <CreditCard />,
     description: "Pay cash after physical delivery & inspection at your farm",
+  },
+  manual: {
+    title: "Manual / Agri Banking",
+    icon: <CreditCard />,
+    description: "Direct bank transfer / offline payment",
+  },
+  system_default: {
+    title: "NetBanking / UPI / Cards (Direct Gateway)",
+    icon: <CreditCard />,
+    description: "SBI, HDFC, ICICI, Axis, PNB and 50+ banks",
+  },
+  pp_system_default: {
+    title: "NetBanking / UPI / Cards (Direct Gateway)",
+    icon: <CreditCard />,
+    description: "SBI, HDFC, ICICI, Axis, PNB and 50+ banks",
   },
   pp_stripe_stripe: {
     title: "Credit / Debit Card",
@@ -59,11 +99,6 @@ export const paymentInfoMap: Record<
   pp_paypal_paypal: {
     title: "PayPal",
     icon: <PayPal />,
-  },
-  pp_system_default: {
-    title: "NetBanking / UPI / Cards (Direct Gateway)",
-    icon: <CreditCard />,
-    description: "SBI, HDFC, ICICI, Axis, PNB and 50+ banks",
   },
 }
 

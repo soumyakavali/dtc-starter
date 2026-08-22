@@ -11,7 +11,9 @@ type CartTotalsProps = {
     currency_code: string
     item_subtotal?: number | null
     shipping_subtotal?: number | null
+    shipping_total?: number | null
     discount_subtotal?: number | null
+    discount_total?: number | null
   }
 }
 
@@ -21,36 +23,43 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     total,
     tax_total,
     item_subtotal,
+    subtotal,
     shipping_subtotal,
+    shipping_total,
     discount_subtotal,
+    discount_total,
   } = totals
+
+  const effectiveSubtotal = item_subtotal ?? subtotal ?? 0
+  const effectiveShipping = shipping_subtotal ?? shipping_total ?? 0
+  const effectiveDiscount = discount_subtotal ?? discount_total ?? 0
 
   return (
     <div>
       <div className="flex flex-col gap-y-2 txt-medium text-ui-fg-subtle ">
         <div className="flex items-center justify-between">
           <span>Subtotal (excl. shipping and taxes)</span>
-          <span data-testid="cart-subtotal" data-value={item_subtotal || 0}>
-            {convertToLocale({ amount: item_subtotal ?? 0, currency_code })}
+          <span data-testid="cart-subtotal" data-value={effectiveSubtotal}>
+            {convertToLocale({ amount: effectiveSubtotal, currency_code })}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span>Shipping</span>
-          <span data-testid="cart-shipping" data-value={shipping_subtotal || 0}>
-            {convertToLocale({ amount: shipping_subtotal ?? 0, currency_code })}
+          <span data-testid="cart-shipping" data-value={effectiveShipping}>
+            {convertToLocale({ amount: effectiveShipping, currency_code })}
           </span>
         </div>
-        {!!discount_subtotal && (
+        {!!effectiveDiscount && (
           <div className="flex items-center justify-between">
             <span>Discount</span>
             <span
               className="text-ui-fg-interactive"
               data-testid="cart-discount"
-              data-value={discount_subtotal || 0}
+              data-value={effectiveDiscount}
             >
               -{" "}
               {convertToLocale({
-                amount: discount_subtotal ?? 0,
+                amount: effectiveDiscount,
                 currency_code,
               })}
             </span>

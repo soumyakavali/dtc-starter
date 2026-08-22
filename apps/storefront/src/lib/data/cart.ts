@@ -41,6 +41,28 @@ export async function retrieveCart(
   // Check local cart state first
   const localData = await getLocalCartData()
   if (localData && Array.isArray(localData.items) && localData.items.length > 0) {
+    let customer: HttpTypes.StoreCustomer | null = null
+    try {
+      customer = await retrieveCustomer()
+    } catch {
+      customer = null
+    }
+
+    if (customer && !localData.customer_id) {
+      localData.customer_id = customer.id
+      localData.customer = customer as unknown as HttpTypes.StoreCustomer
+      localData.email = localData.email || customer.email
+      if (customer.addresses?.[0]) {
+        localData.shipping_address =
+          localData.shipping_address ||
+          (customer.addresses[0] as unknown as HttpTypes.StoreCartAddress)
+        localData.billing_address =
+          localData.billing_address ||
+          (customer.addresses[0] as unknown as HttpTypes.StoreCartAddress)
+      }
+      await setLocalCartData(localData)
+    }
+
     const computed = calculateCartTotals(localData)
     return computed as unknown as HttpTypes.StoreCart
   }
@@ -573,17 +595,9 @@ export async function applyPromotions(codes: string[]) {
 
   const localCart = await getLocalCartData()
   if (localCart) {
-    const promoObjs = codes.map((code) => ({
-      id: `promo_${code.toLowerCase()}`,
-      code: code.toUpperCase(),
-      application_method: {
-        type: "percentage",
-        value: 10,
-      },
-    }))
     const updated = {
       ...localCart,
-      promotions: promoObjs,
+      promotions: codes,
       promo_codes: codes,
     }
     const recalculated = calculateCartTotals(updated)
@@ -772,9 +786,12 @@ export async function placeOrder(cartId?: string) {
         payments: [
           {
             id: `pay_${Date.now()}`,
-            provider_id: "phonepe",
+            provider_id:
+              localCart.payment_collection?.payment_sessions?.[0]?.provider_id ||
+              "pp_upi_phonepe",
             amount: localCart.total || 0,
             currency_code: "inr",
+            created_at: new Date().toISOString(),
           },
         ],
       },

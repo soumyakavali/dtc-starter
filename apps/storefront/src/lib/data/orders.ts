@@ -50,6 +50,20 @@ export const retrieveOrder = async (id: string) => {
     return demoOrder
   }
 
+  // Fallback for simulated/local order IDs
+  if (id.startsWith("order_bt_") || id.startsWith("order_")) {
+    const base = lastOrder || DEMO_ORDERS[0]
+    return {
+      ...base,
+      id,
+      display_id: Math.floor(100000 + Math.random() * 900000),
+      status: "completed",
+      fulfillment_status: "not_fulfilled",
+      payment_status: "captured",
+      created_at: new Date().toISOString(),
+    } as unknown as HttpTypes.StoreOrder
+  }
+
   return lastOrder || null
 }
 

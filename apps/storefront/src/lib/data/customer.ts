@@ -423,12 +423,39 @@ export async function transferCart() {
     return
   }
 
-  const headers = await getAuthHeaders()
+  const customer = await retrieveCustomer()
+  if (!customer) {
+    return
+  }
 
-  await sdk.store.cart.transferCart(cartId, {}, headers)
+  const localCart = await getLocalCartData()
+  if (localCart) {
+    await setLocalCartData({
+      ...localCart,
+      customer_id: customer.id,
+      email: customer.email,
+      shipping_address:
+        localCart.shipping_address ||
+        (customer.addresses?.[0] as unknown as HttpTypes.StoreCartAddress),
+      billing_address:
+        localCart.billing_address ||
+        (customer.addresses?.[0] as unknown as HttpTypes.StoreCartAddress),
+    })
+  }
+
+  if (!cartId.startsWith("cart_local_")) {
+    try {
+      const headers = await getAuthHeaders()
+      await sdk.store.cart.transferCart(cartId, {}, headers)
+    } catch {
+      // ignore
+    }
+  }
 
   const cartCacheTag = await getCacheTag("carts")
-  revalidateTag(cartCacheTag)
+  if (cartCacheTag) {
+    revalidateTag(cartCacheTag)
+  }
 }
 
 export const addCustomerAddress = async (
