@@ -49,13 +49,32 @@ export default async function Nav() {
               <TestRunnerModal />
             </div>
 
-            <LocalizedClientLink
-              href="/account"
-              className="text-xs sm:text-sm font-medium text-gray-700 hover:text-emerald-800 transition-colors px-2 py-1"
-              data-testid="nav-account-link"
-            >
-              {customer ? "My Account" : "Sign In"}
-            </LocalizedClientLink>
+            {customer ? (
+              <LocalizedClientLink
+                href="/account"
+                className="text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 transition-colors px-2.5 sm:px-3 py-1.5 rounded-lg border border-emerald-200 shadow-2xs"
+                data-testid="nav-account-link"
+              >
+                My Account
+              </LocalizedClientLink>
+            ) : (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <LocalizedClientLink
+                  href="/account"
+                  className="text-xs sm:text-sm font-semibold text-gray-700 hover:text-emerald-800 bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 transition-colors px-2.5 sm:px-3 py-1.5 rounded-lg shadow-2xs"
+                  data-testid="nav-account-link"
+                >
+                  Sign In
+                </LocalizedClientLink>
+                <LocalizedClientLink
+                  href="/account?mode=register"
+                  className="text-xs sm:text-sm font-semibold text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 hover:border-emerald-300 transition-colors px-2.5 sm:px-3 py-1.5 rounded-lg shadow-2xs"
+                  data-testid="nav-register-link"
+                >
+                  Register
+                </LocalizedClientLink>
+              </div>
+            )}
 
             <Suspense
               fallback={

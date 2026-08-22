@@ -39,7 +39,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl font-bold">
             📦
@@ -56,7 +56,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
           </div>
           <div>
             <span className="text-xs text-gray-500 font-medium">Farm Delivery / ವಿಳಾಸ</span>
-            <div className="text-sm font-semibold text-gray-800">
+            <div className="text-sm font-semibold text-gray-800 line-clamp-1">
               {customer?.addresses && customer.addresses.length > 0
                 ? customer.addresses[0].address_1 || "Karnataka Farm"
                 : "Karnataka (Direct Delivery)"}
@@ -70,10 +70,54 @@ const Overview = ({ customer, orders }: OverviewProps) => {
           </div>
           <div>
             <span className="text-xs text-gray-500 font-medium">Agri Support Helpline</span>
-            <div className="text-sm font-bold text-emerald-700">+91 94800 00000</div>
+            <div className="text-sm font-bold text-emerald-700">+91 800 123 4567</div>
           </div>
         </div>
       </div>
+
+      {/* Farmer Agri Metadata Card */}
+      {customer?.metadata && (
+        <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5 mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-950 flex items-center gap-1.5">
+              <span>🌾</span> Farm Profile & Landholding / ಕೃಷಿ ವಿವರಗಳು
+            </h4>
+            <span className="text-[11px] font-semibold bg-emerald-100 text-emerald-900 px-2.5 py-0.5 rounded-full border border-emerald-300">
+              {String(customer.metadata.member_tier || "BioTill Verified")}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="bg-white p-3 rounded-xl border border-emerald-100">
+              <span className="text-gray-400 block text-[10px]">District & Taluk</span>
+              <span className="font-bold text-gray-800">
+                {String(customer.metadata.district || "Mandya")}, {String(customer.metadata.taluk || "Maddur")}
+              </span>
+            </div>
+
+            <div className="bg-white p-3 rounded-xl border border-emerald-100">
+              <span className="text-gray-400 block text-[10px]">Primary Crops</span>
+              <span className="font-bold text-emerald-800">
+                {String(customer.metadata.primary_crop || "Sugarcane & Paddy")}
+              </span>
+            </div>
+
+            <div className="bg-white p-3 rounded-xl border border-emerald-100">
+              <span className="text-gray-400 block text-[10px]">Landholding</span>
+              <span className="font-bold text-gray-800">
+                {String(customer.metadata.landholding_acres || "4.5 Acres")}
+              </span>
+            </div>
+
+            <div className="bg-white p-3 rounded-xl border border-emerald-100">
+              <span className="text-gray-400 block text-[10px]">Kisan Status</span>
+              <span className="font-bold text-emerald-700">
+                {String(customer.metadata.kisan_card_status || "Verified")}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col py-4 border-t border-gray-200">
         <div className="flex items-center justify-between mb-4">

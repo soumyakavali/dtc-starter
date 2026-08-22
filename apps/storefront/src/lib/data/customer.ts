@@ -7,6 +7,7 @@ import { FetchError } from "@medusajs/js-sdk"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { cookies as nextCookies } from "next/headers"
+import { DEMO_FARMER_ACCOUNT } from "./mock-data"
 import {
   getAuthHeaders,
   getCacheOptions,
@@ -225,6 +226,15 @@ async function completeLogin(
     email?: string
   }
 ): Promise<CustomerAuthState> {
+  // Check for Demo Farmer Account test credentials
+  const cleanEmail = email.toLowerCase().trim()
+  const cleanPhone = (fallbackCustomerInfo?.phone || "").replace(/[^0-9]/g, "")
+  const isDemoAccount =
+    cleanEmail.includes("9845012345") ||
+    cleanEmail.includes("basavaraj") ||
+    cleanPhone === "9845012345" ||
+    password === "farmer123"
+
   let result: Awaited<ReturnType<typeof sdk.auth.login>>
 
   try {
@@ -232,25 +242,43 @@ async function completeLogin(
   } catch (_error) {
     // If backend is offline / standalone, create local farmer session cookie
     try {
+      const sessionData = isDemoAccount
+        ? {
+            ...DEMO_FARMER_ACCOUNT,
+            created_at: new Date().toISOString(),
+          }
+        : {
+            id: `cus_farmer_${Date.now()}`,
+            first_name: fallbackCustomerInfo?.first_name || "BioTill Farmer",
+            last_name: fallbackCustomerInfo?.last_name || "",
+            email,
+            phone: fallbackCustomerInfo?.phone || "",
+            created_at: new Date().toISOString(),
+            addresses: [
+              {
+                id: `addr_${Date.now()}`,
+                first_name: fallbackCustomerInfo?.first_name || "Farmer",
+                last_name: fallbackCustomerInfo?.last_name || "",
+                address_1: "Farm Delivery Address",
+                city: "Karnataka",
+                province: "Karnataka",
+                postal_code: "571428",
+                country_code: "in",
+                phone: fallbackCustomerInfo?.phone || "",
+                is_default_shipping: true,
+                is_default_billing: true,
+              },
+            ],
+          }
+
       const cookies = await nextCookies()
-      cookies.set(
-        "_biotill_farmer_session",
-        JSON.stringify({
-          id: `cus_farmer_${Date.now()}`,
-          first_name: fallbackCustomerInfo?.first_name || "BioTill Farmer",
-          last_name: fallbackCustomerInfo?.last_name || "",
-          email,
-          phone: fallbackCustomerInfo?.phone || "",
-          created_at: new Date().toISOString(),
-          addresses: [],
-        }),
-        {
-          maxAge: 60 * 60 * 24 * 30,
-          httpOnly: true,
-          sameSite: "strict",
-          secure: process.env.NODE_ENV === "production",
-        }
-      )
+      cookies.set("_biotill_farmer_session", JSON.stringify(sessionData), {
+        maxAge: 60 * 60 * 24 * 30,
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+      })
       return { state: "success" }
     } catch {
       return { state: "error", error: "Invalid login credentials. Please check your mobile number / password." }

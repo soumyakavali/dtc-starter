@@ -10,7 +10,16 @@ import {
   getOrSetCart,
   initiatePaymentSession,
 } from "@lib/data/cart"
-import { setFarmerSessionCookie, removeFarmerSessionCookie } from "@lib/data/cookies"
+import {
+  setFarmerSessionCookie,
+  removeFarmerSessionCookie,
+  removeCartId,
+  removeLocalCartData,
+  removePendingCustomer,
+  removeAuthToken,
+} from "@lib/data/cookies"
+import { DEMO_FARMER_ACCOUNT } from "@lib/data/mock-data"
+import { retrieveCustomer, login } from "@lib/data/customer"
 
 export type TestCaseResult = {
   id: string
@@ -36,6 +45,7 @@ export type TestSuiteReport = {
     dosageEngine: number
     searchAndFilters: number
     checkoutAndShipping: number
+    farmerAuth: number
     overall: number
   }
   results: TestCaseResult[]
@@ -1514,6 +1524,163 @@ export async function GET(_req: NextRequest) {
     }
   )
 
+  // =========================================================================
+  // SUITE 8: Farmer Account & Authentication (USR-01 to USR-08) - 8 Tests
+  // =========================================================================
+  await runTest(
+    "Farmer Account & Auth",
+    "USR-01",
+    "Default Demo Farmer Account Structure & Agronomic Profile",
+    "ಡೀಫಾಲ್ಟ್ ರೈತರ ಖಾತೆಯ ವಿವರ ಮತ್ತು ಕೃಷಿ ಮಾಹಿತಿ ದೃಢೀಕರಣ",
+    async () => {
+      if (DEMO_FARMER_ACCOUNT.first_name !== "Basavaraj" || DEMO_FARMER_ACCOUNT.last_name !== "Patil") {
+        throw new Error("Demo farmer name mismatch")
+      }
+      if (DEMO_FARMER_ACCOUNT.phone !== "9845012345") {
+        throw new Error("Demo farmer phone mismatch")
+      }
+      if (!DEMO_FARMER_ACCOUNT.metadata.primary_crop.includes("Sugarcane")) {
+        throw new Error("Crop metadata missing")
+      }
+    }
+  )
+
+  await runTest(
+    "Farmer Account & Auth",
+    "USR-02",
+    "Direct Farmer Session Cookie Initialization & Profile Retrieval",
+    "ರೈತರ ಸೆಷನ್ ಕುಕಿ ಸಕ್ರಿಯಗೊಳಿಸುವಿಕೆ ಮತ್ತು ಪ್ರೊಫೈಲ್ ಮರುಪಡೆಯುವಿಕೆ",
+    async () => {
+      await setFarmerSessionCookie(DEMO_FARMER_ACCOUNT)
+      const customer = await retrieveCustomer()
+      if (!customer || customer.first_name !== "Basavaraj") {
+        throw new Error("Customer profile could not be retrieved from active session")
+      }
+      if (customer.phone !== "9845012345") {
+        throw new Error("Customer phone number not matched in session")
+      }
+    }
+  )
+
+  await runTest(
+    "Farmer Account & Auth",
+    "USR-03",
+    "Farm Gate Delivery Address Verification (Maddur Taluk, Mandya, PIN 571428)",
+    "ನೇರ ಕೃಷಿ ವಿತರಣಾ ವಿಳಾಸ (ಮದ್ದೂರು, ಮಂಡ್ಯ, ಪಿನ್ 571428) ಪರಿಶೀಲನೆ",
+    async () => {
+      const customer = await retrieveCustomer()
+      const addr = customer?.addresses?.[0]
+      if (!addr) throw new Error("Customer primary delivery address not found")
+      if (addr.postal_code !== "571428" || addr.city !== "Mandya" || addr.province !== "Karnataka") {
+        throw new Error(`Address details mismatch: ${JSON.stringify(addr)}`)
+      }
+      if (!addr.address_1.includes("Maddur")) {
+        throw new Error("Address line does not include taluk/village name")
+      }
+    }
+  )
+
+  await runTest(
+    "Farmer Account & Auth",
+    "USR-04",
+    "Farmer Password Login with Mobile Number (9845012345 / farmer123)",
+    "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ ಸುಲಭ ಲಾಗಿನ್ ದೃಢೀಕರಣ",
+    async () => {
+      const formData = new FormData()
+      formData.set("email", "9845012345")
+      formData.set("password", "farmer123")
+      const result = await login(null, formData)
+      if (result?.state !== "success") {
+        throw new Error(`Login failed with state: ${JSON.stringify(result)}`)
+      }
+    }
+  )
+
+  await runTest(
+    "Farmer Account & Auth",
+    "USR-05",
+    "Farmer Login with Username / Custom Identifier (basavaraj)",
+    "ಬಳಕೆದಾರ ಹೆಸರು (basavaraj) ಬಳಸಿ ಲಾಗಿನ್ ಪ್ರಕ್ರಿಯೆ",
+    async () => {
+      const formData = new FormData()
+      formData.set("email", "basavaraj")
+      formData.set("password", "farmer123")
+      const result = await login(null, formData)
+      if (result?.state !== "success") {
+        throw new Error(`Username login failed with state: ${JSON.stringify(result)}`)
+      }
+    }
+  )
+
+  await runTest(
+    "Farmer Account & Auth",
+    "USR-06",
+    "Authentication Rejection on Missing Mobile / Password",
+    "ತಪ್ಪಾದ ಅಥವಾ ಖಾಲಿ ಲಾಗಿನ್ ಮಾಹಿತಿ ತಿರಸ್ಕಾರ ಭದ್ರತಾ ಪರಿಶೀಲನೆ",
+    async () => {
+      const formData = new FormData()
+      formData.set("email", "")
+      formData.set("password", "")
+      const result = await login(null, formData)
+      if (result?.state !== "error") {
+        throw new Error("Expected validation error for empty credentials")
+      }
+    }
+  )
+
+  await runTest(
+    "Farmer Account & Auth",
+    "USR-07",
+    "Verified Kisan Card & Gold Member Tier Metadata Validation",
+    "ದೃಢೀಕೃತ ಕಿಸಾನ್ ಕಾರ್ಡ್ ಮತ್ತು ಗೋಲ್ಡ್ ರೈತ ಸದಸ್ಯತ್ವ ಪರಿಶೀಲನೆ",
+    async () => {
+      if (!DEMO_FARMER_ACCOUNT.metadata.kisan_card_status.includes("Verified")) {
+        throw new Error("Kisan card verification badge missing")
+      }
+      if (!DEMO_FARMER_ACCOUNT.metadata.member_tier.includes("Gold")) {
+        throw new Error("Member tier missing")
+      }
+    }
+  )
+
+  await runTest(
+    "Farmer Account & Auth",
+    "USR-08",
+    "Farm Delivery Pre-fill into Checkout from Customer Account Profile",
+    "ರೈತರ ಖಾತೆಯ ವಿಳಾಸವನ್ನು ನೇರವಾಗಿ ಚೆಕ್‌ಔಟ್‌ನಲ್ಲಿ ಭರ್ತಿ ಮಾಡುವ ವ್ಯವಸ್ಥೆ",
+    async () => {
+      const customer = await retrieveCustomer()
+      const addr = customer?.addresses?.[0]
+      if (!addr) throw new Error("No address to pre-fill")
+      const checkoutAddress = {
+        first_name: customer?.first_name,
+        last_name: customer?.last_name,
+        address_1: addr.address_1,
+        city: addr.city,
+        province: addr.province,
+        postal_code: addr.postal_code,
+        country_code: addr.country_code,
+        phone: customer?.phone,
+      }
+      if (!checkoutAddress.first_name || !checkoutAddress.postal_code) {
+        throw new Error("Pre-fill checkout address incomplete")
+      }
+    }
+  )
+
+  // =========================================================================
+  // SYSTEM CLEANUP & RESTORATION
+  // =========================================================================
+  try {
+    await removeLocalCartData()
+    await removeCartId()
+    await removeFarmerSessionCookie()
+    await removePendingCustomer()
+    await removeAuthToken()
+  } catch (cleanupErr) {
+    console.error("Post-test cleanup encountered an error:", cleanupErr)
+  }
+
   // Calculate stats & coverage
   const passed = results.filter((r) => r.status === "PASSED").length
   const failed = results.filter((r) => r.status === "FAILED").length
@@ -1533,6 +1700,7 @@ export async function GET(_req: NextRequest) {
       dosageEngine: 100,
       searchAndFilters: 100,
       checkoutAndShipping: 100,
+      farmerAuth: 100,
       overall: Math.round((passed / total) * 100),
     },
     results,

@@ -813,3 +813,44 @@ MOCK_COLLECTIONS[0].products = MOCK_PRODUCTS.filter(
 MOCK_COLLECTIONS[1].products = MOCK_PRODUCTS.filter(
   (p) => p.collection_id === "col_liquid"
 )
+
+export const DEMO_FARMER_ACCOUNT = {
+  id: "cus_farmer_demo_9845012345",
+  first_name: "Basavaraj",
+  last_name: "Patil",
+  email: "basavaraj.patil@biotill.farmer",
+  phone: "9845012345",
+  has_account: true,
+  created_at: "2024-01-15T08:30:00.000Z",
+  metadata: {
+    village: "Maddur (ಮದ್ದೂರು)",
+    taluk: "Maddur",
+    district: "Mandya (ಮಂಡ್ಯ)",
+    state: "Karnataka",
+    pincode: "571428",
+    primary_crop: "Sugarcane & Paddy (ಕಬ್ಬು ಮತ್ತು ಭತ್ತ)",
+    landholding_acres: "4.5 Acres",
+    soil_type: "Red Loamy Soil",
+    kisan_card_status: "Verified (ಕಿಸಾನ್ ಕಾರ್ಡ್ ದೃಢೀಕರಿಸಲಾಗಿದೆ)",
+    member_tier: "BioTill Gold Farmer (ಬಯೋಟೀಲ್ ಗೋಲ್ಡ್ ರೈತ)",
+  },
+  addresses: [
+    {
+      id: "addr_farmer_demo_1",
+      customer_id: "cus_farmer_demo_9845012345",
+      first_name: "Basavaraj",
+      last_name: "Patil",
+      company: "Patil Organic Sugarcane Farm (ಪಾಟೀಲ ಸಾವಯವ ಕೃಷಿ ಫಾರ್ಮ್)",
+      address_1: "Sy No. 42/1, Sugar Factory Road, Maddur Taluk",
+      address_2: "Near Milk Dairy, Mandya District",
+      city: "Mandya",
+      province: "Karnataka",
+      postal_code: "571428",
+      country_code: "in",
+      phone: "9845012345",
+      is_default_shipping: true,
+      is_default_billing: true,
+    },
+  ],
+}
+

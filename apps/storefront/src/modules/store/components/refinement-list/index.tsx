@@ -15,6 +15,7 @@ type RefinementListProps = {
   sortBy: SortOptions
   search?: boolean
   hideOptionsPicker?: boolean
+  hideSortBy?: boolean
   currentCategoryHandle?: string
   "data-testid"?: string
 }
@@ -22,6 +23,7 @@ type RefinementListProps = {
 const RefinementList = ({
   sortBy,
   hideOptionsPicker = false,
+  hideSortBy = false,
   currentCategoryHandle,
   "data-testid": dataTestId,
 }: RefinementListProps) => {
@@ -69,11 +71,13 @@ const RefinementList = ({
   return (
     <div className="flex flex-col gap-8 py-4 mb-8 small:px-0 pl-6 small:min-w-[250px] small:ml-[1.675rem]">
       <CategoryPicker currentCategoryHandle={currentCategoryHandle} />
-      <SortProducts
-        sortBy={sortBy}
-        setQueryParams={setQueryParams}
-        data-testid={dataTestId}
-      />
+      {!hideSortBy && (
+        <SortProducts
+          sortBy={sortBy}
+          setQueryParams={setQueryParams}
+          data-testid={dataTestId}
+        />
+      )}
       {!hideOptionsPicker && (
         <OptionsPicker
           selectedValueIds={selectedOptionValueIds}

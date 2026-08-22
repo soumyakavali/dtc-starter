@@ -81,6 +81,7 @@ export default function TestRunnerModal() {
 
   const suites = [
     "all",
+    "Farmer Account & Auth",
     "Catalog & Inventory",
     "Categories & Taxonomy",
     "Cart & Transactions",

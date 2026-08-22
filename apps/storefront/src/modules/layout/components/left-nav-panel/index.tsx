@@ -381,13 +381,32 @@ export default function LeftNavPanel({ customer }: LeftNavPanelProps) {
           </div>
 
           <div className="pt-2 border-t border-gray-200/60 flex items-center justify-between text-xs font-semibold">
-            <LocalizedClientLink
-              href="/account"
-              onClick={() => setIsOpen(false)}
-              className="text-gray-700 hover:text-emerald-800"
-            >
-              {customer ? "My Account" : "Sign In"}
-            </LocalizedClientLink>
+            {customer ? (
+              <LocalizedClientLink
+                href="/account"
+                onClick={() => setIsOpen(false)}
+                className="text-gray-700 hover:text-emerald-800"
+              >
+                My Account
+              </LocalizedClientLink>
+            ) : (
+              <div className="flex items-center gap-2">
+                <LocalizedClientLink
+                  href="/account"
+                  onClick={() => setIsOpen(false)}
+                  className="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-emerald-50 text-gray-800 hover:text-emerald-800 border border-gray-200 transition-colors"
+                >
+                  Sign In
+                </LocalizedClientLink>
+                <LocalizedClientLink
+                  href="/account?mode=register"
+                  onClick={() => setIsOpen(false)}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-semibold transition-colors"
+                >
+                  Register
+                </LocalizedClientLink>
+              </div>
+            )}
             <LocalizedClientLink
               href="/cart"
               onClick={() => setIsOpen(false)}
