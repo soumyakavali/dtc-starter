@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+# Install build dependencies
+RUN apk add --no-cache libc6-compat python3 make g++
+
+WORKDIR /app
+
+# Copy root workspace configurations
+COPY package.json turbo.json package-lock.json* ./
+COPY apps/backend/package.json ./apps/backend/
+COPY apps/storefront/package.json ./apps/storefront/
+
+# Install dependencies
+RUN npm install
+
+# The actual source code will be mounted as a volume in docker-compose.yml

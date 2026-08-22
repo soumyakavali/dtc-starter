@@ -4,7 +4,7 @@ networks:
 
 services:
   # =========================================================================
-  # 1. PostgreSQL Database (Medusa v2 Relational Store)
+  # 1. PostgreSQL Database
   # =========================================================================
   postgres:
     image: postgres:16-alpine
@@ -47,12 +47,12 @@ services:
       retries: 5
 
   # =========================================================================
-  # 3. Medusa v2 Backend (BIOTILL AGRI PRIVATE LIMITED API & Admin)
+  # 3. Medusa v2 Backend
   # =========================================================================
   backend:
     build:
       context: .
-      dockerfile: apps/backend/Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: biotill-backend
     restart: unless-stopped
     networks:
@@ -64,12 +64,16 @@ services:
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-biotill_super_secure_jwt_secret_key_2026}
       COOKIE_SECRET: ${COOKIE_SECRET:-biotill_super_secure_cookie_secret_key_2026}
-      STORE_CORS: http://localhost:3000,http://127.0.0.1:3000
+      STORE_CORS: http://localhost:3000,http://127.0.0.1:3000,http://storefront:3000
       ADMIN_CORS: http://localhost:9000,http://localhost:7001,http://localhost:5173
       AUTH_CORS: http://localhost:3000,http://localhost:9000,http://127.0.0.1:3000
       PORT: 9000
       NODE_ENV: development
-    command: sh -c "npx medusa db:migrate && npm run dev"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: >
+      sh -c "cd apps/backend && npx medusa db:migrate && cd /app && npm run backend:dev"
     depends_on:
       postgres:
         condition: service_healthy
@@ -77,18 +81,12 @@ services:
         condition: service_healthy
 
   # =========================================================================
-  # 4. Next.js 15 Storefront (BIOTILL AGRI Direct eCommerce Frontend)
+  # 4. Next.js 15 Storefront
   # =========================================================================
   storefront:
     build:
       context: .
-      dockerfile: apps/storefront/Dockerfile
-      args:
-        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:3000}
-        NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-http://localhost:9000}
-        MEDUSA_BACKEND_URL: ${MEDUSA_BACKEND_URL:-http://backend:9000}
-        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-pk_01J_dummy_biotill_key}
-        NEXT_PUBLIC_DEFAULT_REGION: in
+      dockerfile: Dockerfile.dev
     container_name: biotill-storefront
     restart: unless-stopped
     networks:
@@ -102,7 +100,11 @@ services:
       NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-http://localhost:9000}
       NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-pk_01J_dummy_biotill_key}
       NEXT_PUBLIC_DEFAULT_REGION: in
-      NODE_ENV: production
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run --prefix apps/storefront dev
     depends_on:
       - backend
 
