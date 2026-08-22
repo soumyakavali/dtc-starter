@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { listCartShippingMethods } from "@lib/data/fulfillment"
 import { listCartPaymentMethods } from "@lib/data/payment"
 import { HttpTypes } from "@medusajs/types"
@@ -26,13 +27,21 @@ export default async function CheckoutForm({
 
   return (
     <div className="w-full grid grid-cols-1 gap-y-8">
-      <Addresses cart={cart} customer={customer} />
+      <Suspense fallback={null}>
+        <Addresses cart={cart} customer={customer} />
+      </Suspense>
 
-      <Shipping cart={cart} availableShippingMethods={shippingMethods} />
+      <Suspense fallback={null}>
+        <Shipping cart={cart} availableShippingMethods={shippingMethods} />
+      </Suspense>
 
-      <Payment cart={cart} availablePaymentMethods={paymentMethods} />
+      <Suspense fallback={null}>
+        <Payment cart={cart} availablePaymentMethods={paymentMethods} />
+      </Suspense>
 
-      <Review cart={cart} />
+      <Suspense fallback={null}>
+        <Review cart={cart} />
+      </Suspense>
     </div>
   )
 }

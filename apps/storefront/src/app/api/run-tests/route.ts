@@ -2506,6 +2506,71 @@ export async function GET(_req: NextRequest) {
     }
   )
 
+  await runTest(
+    "Core Pages Integration",
+    "UI-91",
+    "Home Page Verification ('/in')",
+    "ಮುಖಪುಟ ಪರಿಶೀಲನೆ ('/in')",
+    async () => {
+      const res = await fetch("http://localhost:3000/in").catch(() => null)
+      if (!res || !res.ok) {
+        throw new Error("Home page failed to load or returned non-OK status")
+      }
+    }
+  )
+
+  await runTest(
+    "Core Pages Integration",
+    "UI-92",
+    "Cart Page Verification ('/in/cart')",
+    "ಕಾರ್ಟ್ ಪುಟ ಪರಿಶೀಲನೆ ('/in/cart')",
+    async () => {
+      const res = await fetch("http://localhost:3000/in/cart").catch(() => null)
+      if (!res || !res.ok) {
+        throw new Error("Cart page failed to load or returned non-OK status")
+      }
+    }
+  )
+
+  await runTest(
+    "Core Pages Integration",
+    "UI-93",
+    "Contact Page Verification ('/in/contact')",
+    "ಸಂಪರ್ಕ ಪುಟ ಪರಿಶೀಲನೆ ('/in/contact')",
+    async () => {
+      const res = await fetch("http://localhost:3000/in/contact").catch(() => null)
+      if (!res || !res.ok) {
+        throw new Error("Contact page failed to load or returned non-OK status")
+      }
+    }
+  )
+
+  await runTest(
+    "Core Pages Integration",
+    "UI-94",
+    "About Page Verification ('/in/about')",
+    "ನಮ್ಮ ಬಗ್ಗೆ ಪುಟ ಪರಿಶೀಲನೆ ('/in/about')",
+    async () => {
+      const res = await fetch("http://localhost:3000/in/about").catch(() => null)
+      if (!res || !res.ok) {
+        throw new Error("About page failed to load or returned non-OK status")
+      }
+    }
+  )
+
+  await runTest(
+    "Core Pages Integration",
+    "UI-95",
+    "Product Detail Page Verification ('/in/products/bio-npk-consortium-liquid')",
+    "ಉತ್ಪನ್ನ ವಿವರ ಪುಟ ಪರಿಶೀಲನೆ ('/in/products/bio-npk-consortium-liquid')",
+    async () => {
+      const res = await fetch("http://localhost:3000/in/products/bio-npk-consortium-liquid").catch(() => null)
+      if (!res || !res.ok) {
+        throw new Error("Product detail page failed to load or returned non-OK status")
+      }
+    }
+  )
+
   // =========================================================================
   // SYSTEM CLEANUP & RESTORATION
   // =========================================================================
