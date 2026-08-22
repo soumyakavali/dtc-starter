@@ -165,13 +165,19 @@ export function calculateCartTotals(cart: Partial<HttpTypes.StoreCart> & Record<
     .filter(Boolean)
 
   let discount_total = 0
-  if (promoCodes.some((c: string) => c.toUpperCase() === "FARMER10")) {
-    discount_total = Math.round(subtotal * 0.1)
-  } else if (promoCodes.some((c: string) => c.toUpperCase() === "BIOTILL50")) {
-    discount_total = Math.min(50, subtotal)
-  } else if (promoCodes.length > 0) {
-    discount_total = Math.round(subtotal * 0.05)
+  for (const code of promoCodes) {
+    const upper = code.toUpperCase().trim()
+    if (upper === "FARMER10" || upper === "WELCOME10") {
+      discount_total += Math.round(subtotal * 0.1)
+    } else if (upper === "BIOTILL50") {
+      discount_total += Math.min(50, subtotal)
+    } else if (upper === "AGRI20") {
+      discount_total += Math.round(subtotal * 0.2)
+    } else if (upper === "BIOTILL") {
+      discount_total += Math.min(100, subtotal)
+    }
   }
+  discount_total = Math.min(subtotal, discount_total)
   const discount_subtotal = discount_total
 
   const promotions = promoCodes.map((code) => ({

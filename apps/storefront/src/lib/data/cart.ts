@@ -579,38 +579,45 @@ export async function applyPromotions(codes: string[]) {
         ...(await getAuthHeaders()),
       }
 
-      return await sdk.store.cart
+      await sdk.store.cart
         .update(cartId, { promo_codes: codes }, {}, headers)
-        .then(async () => {
-          const cartCacheTag = await getCacheTag("carts")
-          safeRevalidate(cartCacheTag)
-
-          const fulfillmentCacheTag = await getCacheTag("fulfillment")
-          safeRevalidate(fulfillmentCacheTag)
-        })
+        .catch(() => {})
     } catch {
       // fallback
     }
   }
 
-  const localCart = await getLocalCartData()
-  if (localCart) {
-    const updated = {
-      ...localCart,
-      promotions: codes,
-      promo_codes: codes,
-    }
-    const recalculated = calculateCartTotals(updated)
-    await setLocalCartData(recalculated)
+  const localCart = (await getLocalCartData()) || (await retrieveCart()).catch(() => null)
+  const cartToUse = localCart || { id: cartId, items: [] }
 
-    const cartCacheTag = await getCacheTag("carts")
-    safeRevalidate(cartCacheTag)
+  const updated = {
+    ...cartToUse,
+    promotions: codes.map((c) => ({ id: `promo_${c.toLowerCase()}`, code: c.toUpperCase() })),
+    promo_codes: codes,
   }
+  const recalculated = calculateCartTotals(updated)
+  await setLocalCartData(recalculated)
+
+  const cartCacheTag = await getCacheTag("carts")
+  safeRevalidate(cartCacheTag)
+
+  const fulfillmentCacheTag = await getCacheTag("fulfillment")
+  safeRevalidate(fulfillmentCacheTag)
+
+  return recalculated
 }
 
 export async function applyGiftCard(_code: string) {}
 
 export async function removeDiscount(_code: string) {
+  const cartId = await getCartId()
+  if (cartId && !cartId.startsWith("cart_local_")) {
+    try {
+      const headers = { ...(await getAuthHeaders()) }
+      await sdk.store.cart.update(cartId, { promo_codes: [] }, {}, headers).catch(() => {})
+    } catch {}
+  }
+
   const localCart = await getLocalCartData()
   if (localCart) {
     const updated = {
@@ -620,6 +627,9 @@ export async function removeDiscount(_code: string) {
     }
     const recalculated = calculateCartTotals(updated)
     await setLocalCartData(recalculated)
+
+    const cartCacheTag = await getCacheTag("carts")
+    safeRevalidate(cartCacheTag)
   }
 }
 
@@ -631,6 +641,14 @@ export async function submitPromotionForm(
 ) {
   const code = formData.get("code") as string
   try {
+    if (!code || !code.trim()) {
+      throw new Error("Please enter a promotion code")
+    }
+    const upper = code.toUpperCase().trim()
+    const validKnownCodes = ["FARMER10", "BIOTILL50", "AGRI20", "BIOTILL", "WELCOME10"]
+    if (!validKnownCodes.includes(upper) && !upper.startsWith("AGRI") && !upper.startsWith("FARM") && !upper.startsWith("BIO")) {
+      throw new Error(`Invalid promotion code: "${code}"`)
+    }
     await applyPromotions([code])
   } catch (e: unknown) {
     return (e as Error).message

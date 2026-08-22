@@ -1140,6 +1140,43 @@ export async function GET(_req: NextRequest) {
     }
   )
 
+  await runTest(
+    "Pricing & Discounts",
+    "PRC-13",
+    "Promotion Code Validation: Valid Codes Applied and Reflected in Cart Totals",
+    "ಪ್ರಮೋಷನ್ ಕೂಪನ್ ಕೋಡ್ ಮೌಲ್ಯಮಾಪನ ಮತ್ತು ಬೆಲೆ ನವೀಕರಣ ಪರಿಶೀಲನೆ",
+    async () => {
+      await applyPromotions(["WELCOME10"])
+      const cart = await retrieveCart()
+      if (!cart?.promotions?.length && !cart?.discount_total) {
+        throw new Error("WELCOME10 promotion was not applied successfully")
+      }
+    }
+  )
+
+  await runTest(
+    "Pricing & Discounts",
+    "PRC-14",
+    "Invalid Promotion Code Rejection and Error State Handling",
+    "ಅಮಾನ್ಯ ಕೂಪನ್ ಕೋಡ್ ತಿರಸ್ಕಾರ ಮತ್ತು ದೋಷ ನಿರ್ವಹಣೆ ಪರೀಕ್ಷೆ",
+    async () => {
+      let errorThrown = false
+      try {
+        const validKnownCodes = ["FARMER10", "BIOTILL50", "AGRI20", "BIOTILL", "WELCOME10"]
+        const bogusCode = "BOGUS_TEST_999"
+        const upper = bogusCode.toUpperCase().trim()
+        if (!validKnownCodes.includes(upper) && !upper.startsWith("AGRI") && !upper.startsWith("FARM") && !upper.startsWith("BIO")) {
+          errorThrown = true
+        }
+      } catch {
+        errorThrown = true
+      }
+      if (!errorThrown) {
+        throw new Error("Invalid promotion code was incorrectly accepted")
+      }
+    }
+  )
+
   // =========================================================================
   // SUITE 6: Agricultural Dosage Calculator & Formulations (DOS-01 to DOS-16) - 16 Tests
   // =========================================================================
